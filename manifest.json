@@ -1,0 +1,38 @@
+{
+  "name": "Halal Investment Calculator",
+  "short_name": "Investment Calc",
+  "description": "Calculate your investment profits and returns with this halal investment calculator",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#006747",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./assets/icons/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icons/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "./assets/screenshots/screen1.jpg",
+      "type": "image/jpg",
+      "sizes": "540x720",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "./assets/screenshots/screen2.jpg",
+      "type": "image/jpg",
+      "sizes": "720x540",
+      "form_factor": "wide"
+    }
+  ]
+}

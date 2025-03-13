@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Offline - Halal Investment Calculator</title>
+        <link
+            rel="shortcut icon"
+            href="./assets/icons/favicon.ico"
+            type="image/x-icon"
+        />
+        <style>
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                max-width: 600px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+                color: #333;
+                text-align: center;
+            }
+            .offline-container {
+                background-color: white;
+                padding: 25px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                margin-top: 50px;
+            }
+            h1 {
+                color: #006747;
+            }
+            .icon {
+                font-size: 60px;
+                margin-bottom: 20px;
+            }
+            .button {
+                background-color: #006747;
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: 600;
+                margin-top: 20px;
+                text-decoration: none;
+                display: inline-block;
+            }
+            .message {
+                margin: 20px 0;
+                line-height: 1.5;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="offline-container">
+            <div class="icon">📶</div>
+            <h1>You're Offline</h1>
+            <p class="message">
+                Your halal investment calculator is still accessible!
+            </p>
+            <p class="message">
+                The calculator's core features work offline. Any previous
+                calculations will be available, and you can still make new ones.
+            </p>
+            <a href="./index.html" class="button">Go to Calculator</a>
+        </div>
+
+        <script>
+            // Check if we're back online and redirect
+            window.addEventListener("online", function () {
+                window.location.href = "./index.html";
+            });
+        </script>
+    </body>
+</html>

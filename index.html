@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Halal Investment Calculator</title>
+        <meta
+            name="description"
+            content="Calculate your investment profits easily. Get forecasts for halal investments and make informed decisions."
+        />
+
+        <!-- Open Graph / Social Media -->
+        <meta property="og:title" content="Halal Investment Calculator" />
+        <meta
+            property="og:description"
+            content="Calculate your potential investment returns with this halal investment calculator."
+        />
+        <meta property="og:type" content="website" />
+        <meta
+            property="og:image"
+            content="./assets/screenshots/halal-investment-calculator.jpg"
+        />
+        <meta
+            property="og:url"
+            content="https://faisalahammad.github.io/halal-investment-calculator"
+        />
+        <meta property="og:site_name" content="Halal Investment Calculator" />
+        <meta name="twitter:card" content="summary_large_image" />
+
+        <!-- PWA Support -->
+        <link rel="manifest" href="./manifest.json" />
+        <meta name="theme-color" content="#006747" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+            name="apple-mobile-web-app-status-bar-style"
+            content="black-translucent"
+        />
+        <meta
+            name="apple-mobile-web-app-title"
+            content="Halal Investment Calculator"
+        />
+        <link rel="apple-touch-icon" href="./assets/icons/icon-192x192.png" />
+        <link
+            rel="shortcut icon"
+            href="./assets/icons/favicon.png"
+            type="image/png"
+        />
+
+        <!-- Stylesheet -->
+        <link rel="stylesheet" href="./assets/css/styles.css" />
+    </head>
+    <body>
+        <div class="calculator">
+            <h1>Halal Investment Calculator</h1>
+
+            <!-- Offline indicator -->
+            <div id="offlineIndicator" class="offline-indicator">
+                You are currently offline. The calculator will still work, but
+                your data won't be synced.
+            </div>
+
+            <!-- Install prompt -->
+            <div id="installPrompt" class="install-prompt">
+                <p>
+                    Install this app on your device for easier access and
+                    offline use!
+                </p>
+                <button id="installButton" class="install-button">
+                    Install App
+                </button>
+            </div>
+
+            <form id="calculatorForm">
+                <div class="input-group">
+                    <label for="earningRange"
+                        >Estimated Earning Percentage (%)</label
+                    >
+                    <div class="range-input">
+                        <input
+                            type="number"
+                            id="minEarning"
+                            placeholder="Min (e.g. 9)"
+                            step="0.1"
+                            min="0"
+                            max="100"
+                        />
+                        <input
+                            type="number"
+                            id="maxEarning"
+                            placeholder="Max (e.g. 10)"
+                            step="0.1"
+                            min="0"
+                            max="100"
+                        />
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="duration">Project Duration (Months)</label>
+                    <input
+                        type="number"
+                        id="duration"
+                        placeholder="Enter months (e.g. 7)"
+                        min="1"
+                        max="60"
+                    />
+                </div>
+
+                <div class="input-group">
+                    <label for="investment">Investment Amount (BDT)</label>
+                    <input
+                        type="number"
+                        id="investment"
+                        placeholder="Enter your investment amount in BDT"
+                        min="1"
+                    />
+                </div>
+
+                <button type="submit" id="calculate">Calculate Profit</button>
+            </form>
+
+            <div class="results" id="results" style="display: none">
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-title">Yearly Return Rate</div>
+                        <div class="result-value" id="yearlyReturnRateRange">
+                            0% - 0%
+                        </div>
+                        <div class="additional-info">
+                            Based on your estimated earning percentage range
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-title">
+                            Total Profit after
+                            <span id="displayDuration">0</span> months
+                        </div>
+                        <div class="result-value" id="totalProfitRange">
+                            ৳0 - ৳0
+                        </div>
+                        <div class="additional-info">
+                            Profit range after project completion
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-title">
+                            Total Return with Profit after
+                            <span id="displayDuration2">0</span> months
+                        </div>
+                        <div class="result-value" id="finalValueRange">
+                            ৳0 - ৳0
+                        </div>
+                        <div class="additional-info">
+                            Your investment + profits after project completion
+                        </div>
+                    </div>
+                </div>
+
+                <div class="projection-section">
+                    <h2 class="projection-title">12 Months Projection</h2>
+                    <div class="results-grid projection-grid">
+                        <div class="result-card projection">
+                            <div class="result-title">Estimated Profit</div>
+                            <div class="result-value" id="twelveMonthRange">
+                                ৳0 - ৳0
+                            </div>
+                            <div class="additional-info">
+                                Estimated profit range if invested for 12 months
+                            </div>
+                        </div>
+
+                        <div class="result-card projection">
+                            <div class="result-title">Total Return</div>
+                            <div
+                                class="result-value"
+                                id="twelveMonthTotalRange"
+                            >
+                                ৳0 - ৳0
+                            </div>
+                            <div class="additional-info">
+                                Your investment + profits if invested for 12
+                                months
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reset-button-container">
+                    <button id="resetCalculator" class="reset-button">
+                        Make Another Calculation
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- JavaScript -->
+        <script src="./assets/js/app.js"></script>
+    </body>
+</html>
