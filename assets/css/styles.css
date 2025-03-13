@@ -199,10 +199,22 @@ button:hover {
     background-color: #2196f3;
     color: white;
     border: none;
-    padding: 8px 12px;
+    padding: 12px 20px;
+    width: 100%;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     margin-top: 10px;
+    transition: background-color 0.3s;
+}
+.install-button:hover {
+    background-color: #1976d2;
+}
+
+/* Hide install prompt on desktop explicitly */
+@media (min-width: 1025px) {
+    .install-prompt.show {
+        display: none !important;
+    }
 }

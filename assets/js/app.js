@@ -8,6 +8,15 @@ function updateOnlineStatus() {
   }
 }
 
+// Check if device has already installed the PWA
+function isPWAInstalled() {
+  // Check if in standalone mode or display-mode is standalone
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
+}
+
 // Add offline/online event listeners
 window.addEventListener("online", updateOnlineStatus);
 window.addEventListener("offline", updateOnlineStatus);
@@ -17,18 +26,41 @@ document.addEventListener("DOMContentLoaded", function () {
   // Check initial online status
   updateOnlineStatus();
 
-  // PWA Install Prompt
+  // Check if already installed as PWA and hide install prompt if needed
+  if (isPWAInstalled()) {
+    const installPrompt = document.getElementById("installPrompt");
+    installPrompt.style.display = "none";
+  }
+
+  // PWA Install Prompt - only for mobile and tablet
   let deferredPrompt;
   const installPrompt = document.getElementById("installPrompt");
   const installButton = document.getElementById("installButton");
+
+  // Function to check if the device is mobile or tablet
+  function isMobileOrTablet() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    // Regular expression to match common mobile and tablet devices
+    const mobileRegex =
+      /(android|webos|iphone|ipad|ipod|blackberry|windows phone|opera mini|iemobile|mobile)/i;
+
+    // Additional check for screen width (typically desktop is wider than 1024px)
+    const isSmallScreen = window.innerWidth <= 1024;
+
+    return mobileRegex.test(userAgent) || isSmallScreen;
+  }
 
   window.addEventListener("beforeinstallprompt", (e) => {
     // Prevent the mini-infobar from appearing on mobile
     e.preventDefault();
     // Stash the event so it can be triggered later
     deferredPrompt = e;
-    // Update UI to notify the user they can install the PWA
-    installPrompt.classList.add("show");
+
+    // Only show install prompt on mobile or tablet and if not already installed
+    if (isMobileOrTablet() && !isPWAInstalled()) {
+      // Update UI to notify the user they can install the PWA
+      installPrompt.classList.add("show");
+    }
   });
 
   installButton.addEventListener("click", (e) => {
