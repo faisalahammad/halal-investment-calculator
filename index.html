@@ -1,201 +1,176 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Halal Investment Calculator</title>
-        <meta
-            name="description"
-            content="Calculate your investment profits easily. Get forecasts for halal investments and make informed decisions."
-        />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Halal Investment Calculator</title>
+    <meta name="description" content="Calculate your investment profits easily. Get forecasts for halal investments and make informed decisions." />
 
-        <!-- Open Graph / Social Media -->
-        <meta property="og:title" content="Halal Investment Calculator" />
-        <meta
-            property="og:description"
-            content="Calculate your potential investment returns with this halal investment calculator."
-        />
-        <meta property="og:type" content="website" />
-        <meta
-            property="og:image"
-            content="./assets/screenshots/halal-investment-calculator.jpg"
-        />
-        <meta
-            property="og:url"
-            content="https://faisalahammad.github.io/halal-investment-calculator/"
-        />
-        <meta property="og:site_name" content="Halal Investment Calculator" />
-        <meta name="twitter:card" content="summary_large_image" />
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="Halal Investment Calculator" />
+    <meta property="og:description" content="Calculate your potential investment returns with this halal investment calculator." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./assets/screenshots/halal-investment-calculator.jpg" />
+    <meta property="og:url" content="https://faisalahammad.github.io/halal-investment-calculator/" />
+    <meta property="og:site_name" content="Halal Investment Calculator" />
+    <meta name="twitter:card" content="summary_large_image" />
 
-        <!-- PWA Support -->
-        <link rel="manifest" href="./manifest.json" />
-        <meta name="theme-color" content="#006747" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta
-            name="apple-mobile-web-app-status-bar-style"
-            content="black-translucent"
-        />
-        <meta
-            name="apple-mobile-web-app-title"
-            content="Halal Investment Calculator"
-        />
-        <link rel="apple-touch-icon" href="./assets/icons/icon-192x192.png" />
-        <link
-            rel="shortcut icon"
-            href="./assets/icons/favicon.png"
-            type="image/png"
-        />
+    <!-- PWA Support -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#006747" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Halal Investment Calculator" />
+    <link rel="apple-touch-icon" href="./assets/icons/icon-192x192.png" />
+    <link rel="shortcut icon" href="./assets/icons/favicon.png" type="image/png" />
 
-        <!-- Stylesheet -->
-        <link rel="stylesheet" href="./assets/css/styles.css" />
-    </head>
-    <body>
-        <div class="calculator">
-            <h1>Halal Investment Calculator</h1>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-            <!-- Offline indicator -->
-            <div id="offlineIndicator" class="offline-indicator">
-                You are currently offline. The calculator will still work, but
-                your data won't be synced.
-            </div>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
 
-            <!-- Install prompt - Only shows on mobile and tablet -->
-            <div id="installPrompt" class="install-prompt">
-                <p>
-                    Install this calculator on your device for easier access and
-                    offline use!
-                </p>
-                <button id="installButton" class="install-button">
-                    Install App
-                </button>
-            </div>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="calculator">
+        <h1><i class="bi bi-calculator-fill me-2"></i>Halal Investment Calculator</h1>
 
-            <form id="calculatorForm">
-                <div class="input-group">
-                    <label for="earningRange"
-                        >Estimated Earning Percentage (%)</label
-                    >
-                    <div class="range-input">
-                        <input
-                            type="number"
-                            id="minEarning"
-                            placeholder="Min (e.g. 9)"
-                            step="0.1"
-                            min="0"
-                            max="100"
-                        />
-                        <input
-                            type="number"
-                            id="maxEarning"
-                            placeholder="Max (e.g. 10)"
-                            step="0.1"
-                            min="0"
-                            max="100"
-                        />
-                    </div>
-                </div>
+        <!-- Offline indicator -->
+        <div id="offlineIndicator" class="offline-indicator"><i class="bi bi-wifi-off me-2"></i>You are currently offline. The calculator will still work, but your data won't be synced.</div>
 
-                <div class="input-group">
-                    <label for="duration">Project Duration (Months)</label>
-                    <input
-                        type="number"
-                        id="duration"
-                        placeholder="Enter months (e.g. 7)"
-                        min="1"
-                        max="60"
-                    />
-                </div>
-
-                <div class="input-group">
-                    <label for="investment">Investment Amount (BDT)</label>
-                    <input
-                        type="number"
-                        id="investment"
-                        placeholder="Enter your investment amount in BDT"
-                        min="1"
-                    />
-                </div>
-
-                <button type="submit" id="calculate">Calculate Profit</button>
-            </form>
-
-            <div class="results" id="results" style="display: none">
-                <div class="results-grid">
-                    <div class="result-card">
-                        <div class="result-title">Yearly Return Rate</div>
-                        <div class="result-value" id="yearlyReturnRateRange">
-                            0% - 0%
-                        </div>
-                        <div class="additional-info">
-                            Based on your estimated earning percentage range
-                        </div>
-                    </div>
-
-                    <div class="result-card">
-                        <div class="result-title">
-                            Total Profit after
-                            <span id="displayDuration">0</span> months
-                        </div>
-                        <div class="result-value" id="totalProfitRange">
-                            ৳0 - ৳0
-                        </div>
-                        <div class="additional-info">
-                            Profit range after project completion
-                        </div>
-                    </div>
-
-                    <div class="result-card">
-                        <div class="result-title">
-                            Total Return with Profit after
-                            <span id="displayDuration2">0</span> months
-                        </div>
-                        <div class="result-value" id="finalValueRange">
-                            ৳0 - ৳0
-                        </div>
-                        <div class="additional-info">
-                            Your investment + profits after project completion
-                        </div>
-                    </div>
-                </div>
-
-                <div class="projection-section">
-                    <h2 class="projection-title">12 Months Projection</h2>
-                    <div class="results-grid projection-grid">
-                        <div class="result-card projection">
-                            <div class="result-title">Estimated Profit</div>
-                            <div class="result-value" id="twelveMonthRange">
-                                ৳0 - ৳0
-                            </div>
-                            <div class="additional-info">
-                                Estimated profit range if invested for 12 months
-                            </div>
-                        </div>
-
-                        <div class="result-card projection">
-                            <div class="result-title">Total Return</div>
-                            <div
-                                class="result-value"
-                                id="twelveMonthTotalRange"
-                            >
-                                ৳0 - ৳0
-                            </div>
-                            <div class="additional-info">
-                                Your investment + profits if invested for 12
-                                months
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="reset-button-container">
-                    <button id="resetCalculator" class="reset-button">
-                        Make Another Calculation
-                    </button>
-                </div>
-            </div>
+        <!-- Install prompt - Only shows on mobile and tablet -->
+        <div id="installPrompt" class="install-prompt">
+          <p><i class="bi bi-download me-2"></i>Install this calculator on your device for easier access and offline use!</p>
+          <button id="installButton" class="install-button"><i class="bi bi-download me-2"></i>Install App</button>
         </div>
 
-        <!-- JavaScript -->
-        <script src="./assets/js/app.js"></script>
-    </body>
+        <form id="calculatorForm" class="needs-validation" novalidate autocomplete="off">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="merchant" class="form-label"> <i class="bi bi-shop me-1"></i>Merchant </label>
+              <select id="merchant" class="form-select" autocomplete="off">
+                <option value="biniyog.io">biniyog.io</option>
+                <option value="iFarmer">iFarmer</option>
+                <option value="WeGro">WeGro</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="project" class="form-label"> <i class="bi bi-folder me-1"></i>Project </label>
+              <input type="text" id="project" class="form-control" placeholder="Enter project name" required autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"> <i class="bi bi-percent me-1"></i>Estimated Earning Percentage (%) </label>
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <input type="number" id="minEarning" class="form-control" placeholder="Min (e.g. 9)" step="0.1" min="0" max="100" required autocomplete="off" />
+              </div>
+              <div class="col-sm-6">
+                <input type="number" id="maxEarning" class="form-control" placeholder="Max (e.g. 10)" step="0.1" min="0" max="100" required autocomplete="off" />
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="duration" class="form-label"> <i class="bi bi-calendar-month me-1"></i>Project Duration (Months) </label>
+              <input type="number" id="duration" class="form-control" placeholder="Enter months (e.g. 7)" min="1" max="60" required autocomplete="off" />
+            </div>
+
+            <div class="col-md-6">
+              <label for="investment" class="form-label"> <i class="bi bi-currency-dollar me-1"></i>Investment Amount (BDT) </label>
+              <input type="number" id="investment" class="form-control" placeholder="Enter your investment amount in BDT" min="1" required autocomplete="off" />
+            </div>
+          </div>
+
+          <div class="d-grid">
+            <button type="submit" id="calculate" class="btn btn-primary btn-lg"><i class="bi bi-calculator me-2"></i>Calculate Profit</button>
+          </div>
+        </form>
+
+        <div class="results mt-5" id="results" style="display: none">
+          <div class="row g-4">
+            <div class="col-md-4">
+              <div class="card h-100 result-card">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-graph-up me-2"></i>Yearly Return Rate</h5>
+                  <p class="card-text result-value" id="yearlyReturnRateRange">0% - 0%</p>
+                  <p class="card-text text-muted">Based on your estimated earning percentage range</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card h-100 result-card">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-cash-stack me-2"></i>Total Profit after <span id="displayDuration">0</span> months</h5>
+                  <p class="card-text result-value" id="totalProfitRange">৳0 - ৳0</p>
+                  <p class="card-text text-muted">Profit range after project completion</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card h-100 result-card">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-bank me-2"></i>Total Return with Profit after <span id="displayDuration2">0</span> months</h5>
+                  <p class="card-text result-value" id="finalValueRange">৳0 - ৳0</p>
+                  <p class="card-text text-muted">Your investment + profits after project completion</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5">
+            <h2 class="text-center mb-4"><i class="bi bi-graph-up-arrow me-2"></i>12 Months Projection</h2>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <div class="card h-100 result-card projection">
+                  <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-cash me-2"></i>Estimated Profit</h5>
+                    <p class="card-text result-value" id="twelveMonthRange">৳0 - ৳0</p>
+                    <p class="card-text text-muted">Estimated profit range if invested for 12 months</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="card h-100 result-card projection">
+                  <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-wallet2 me-2"></i>Total Return</h5>
+                    <p class="card-text result-value" id="twelveMonthTotalRange">৳0 - ৳0</p>
+                    <p class="card-text text-muted">Your investment + profits if invested for 12 months</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-center gap-3 mt-4">
+            <button id="saveCalculation" class="btn btn-success btn-lg"><i class="bi bi-save me-2"></i>Save Calculation</button>
+            <button id="resetCalculator" class="btn btn-danger btn-lg"><i class="bi bi-arrow-counterclockwise me-2"></i>Make Another Calculation</button>
+          </div>
+        </div>
+
+        <!-- Saved Calculations Section -->
+        <div class="saved-calculations mt-5">
+          <h2 class="text-center mb-4"><i class="bi bi-journal-text me-2"></i>Saved Calculations</h2>
+          <div id="savedCalculationsList" class="accordion">
+            <!-- Saved calculations will be displayed here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript -->
+    <script src="./assets/js/app.js"></script>
+  </body>
 </html>
