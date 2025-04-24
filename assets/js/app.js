@@ -130,6 +130,19 @@ document.addEventListener("DOMContentLoaded", function () {
     return date.toLocaleDateString() + " " + date.toLocaleTimeString();
   }
 
+  // Function to toggle favorite status
+  function toggleFavorite(index) {
+    try {
+      const savedCalculations = JSON.parse(localStorage.getItem("savedCalculations") || "[]");
+      savedCalculations[index].favorite = !savedCalculations[index].favorite;
+      localStorage.setItem("savedCalculations", JSON.stringify(savedCalculations));
+      displaySavedCalculations();
+    } catch (e) {
+      console.log("Error toggling favorite:", e);
+      alert("Error updating favorite status. Please try again.");
+    }
+  }
+
   // Function to display saved calculations
   function displaySavedCalculations() {
     const savedCalculationsList = document.getElementById("savedCalculationsList");
@@ -161,6 +174,9 @@ document.addEventListener("DOMContentLoaded", function () {
       validCalculations.forEach((calc, index) => {
         const accordionItem = document.createElement("div");
         accordionItem.className = "accordion-item";
+        if (calc.favorite) {
+          accordionItem.classList.add("favorite-item");
+        }
 
         const accordionHeader = document.createElement("h2");
         accordionHeader.className = "accordion-header";
@@ -174,18 +190,43 @@ document.addEventListener("DOMContentLoaded", function () {
         accordionButton.setAttribute("aria-expanded", "false");
         accordionButton.setAttribute("aria-controls", `collapse${index}`);
 
-        // Create header content with merchant, project, and yearly return rate
+        // Create header content with a better layout
         const headerContent = document.createElement("div");
         headerContent.className = "d-flex justify-content-between align-items-center w-100";
 
-        const headerText = document.createElement("span");
-        headerText.innerHTML = `<strong>${calc.merchant}</strong> - ${calc.project} - ${calc.inputs.duration} months - <span class="text-success">${calc.results.minYearlyReturnRate.toFixed(2)}% - ${calc.results.maxYearlyReturnRate.toFixed(2)}% yearly</span>`;
+        // Create left section with merchant and project info
+        const leftSection = document.createElement("div");
+        leftSection.className = "d-flex align-items-center";
+        leftSection.innerHTML = `
+          <div class="project-info">
+            <div class="merchant-name"><i class="bi bi-shop me-2"></i>${calc.merchant}</div>
+            <div class="project-name text-muted">${calc.project}</div>
+          </div>
+        `;
 
+        // Create middle section with duration and return rate
+        const middleSection = document.createElement("div");
+        middleSection.className = "text-center mx-4";
+        middleSection.innerHTML = `
+          <div class="duration"><i class="bi bi-calendar-month me-1"></i>${calc.inputs.duration} months</div>
+          <div class="return-rate text-success">${calc.results.minYearlyReturnRate.toFixed(2)}% - ${calc.results.maxYearlyReturnRate.toFixed(2)}% yearly</div>
+        `;
+
+        // Create button group for actions
         const buttonGroup = document.createElement("div");
         buttonGroup.className = "btn-group ms-2";
 
+        const favoriteButton = document.createElement("button");
+        favoriteButton.className = `btn btn-favorite ${calc.favorite ? "active" : ""}`;
+        favoriteButton.innerHTML = `<i class="bi bi-heart${calc.favorite ? "-fill" : ""}"></i>`;
+        favoriteButton.setAttribute("title", calc.favorite ? "Remove from favorites" : "Add to favorites");
+        favoriteButton.onclick = function (e) {
+          e.stopPropagation(); // Prevent accordion from toggling
+          toggleFavorite(index);
+        };
+
         const editButton = document.createElement("button");
-        editButton.className = "btn btn-sm btn-primary me-2";
+        editButton.className = "btn btn-primary";
         editButton.innerHTML = '<i class="bi bi-pencil"></i>';
         editButton.setAttribute("title", "Edit this calculation");
         editButton.onclick = function (e) {
@@ -194,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
         };
 
         const deleteButton = document.createElement("button");
-        deleteButton.className = "btn btn-sm btn-danger";
+        deleteButton.className = "btn btn-danger";
         deleteButton.innerHTML = '<i class="bi bi-trash"></i>';
         deleteButton.setAttribute("title", "Delete this calculation");
         deleteButton.onclick = function (e) {
@@ -202,9 +243,12 @@ document.addEventListener("DOMContentLoaded", function () {
           deleteCalculation(index);
         };
 
+        buttonGroup.appendChild(favoriteButton);
         buttonGroup.appendChild(editButton);
         buttonGroup.appendChild(deleteButton);
-        headerContent.appendChild(headerText);
+
+        headerContent.appendChild(leftSection);
+        headerContent.appendChild(middleSection);
         headerContent.appendChild(buttonGroup);
         accordionButton.appendChild(headerContent);
         accordionHeader.appendChild(accordionButton);
@@ -353,6 +397,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Add merchant and project to the calculation data
       currentCalculation.merchant = merchant;
       currentCalculation.project = project;
+      currentCalculation.favorite = false; // Initialize favorite status
 
       // Get existing saved calculations
       const savedCalculations = JSON.parse(localStorage.getItem("savedCalculations") || "[]");
@@ -362,6 +407,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
       if (existingIndex !== -1) {
         if (confirm("A calculation with this project name already exists. Do you want to update it?")) {
+          // Preserve favorite status when updating
+          currentCalculation.favorite = savedCalculations[existingIndex].favorite || false;
           savedCalculations[existingIndex] = currentCalculation;
         } else {
           return;
@@ -456,6 +503,9 @@ document.addEventListener("DOMContentLoaded", function () {
       // Get existing calculations
       const savedCalculations = JSON.parse(localStorage.getItem("savedCalculations") || "[]");
 
+      // Preserve favorite status
+      const favorite = savedCalculations[editingIndex].favorite || false;
+
       // Update the calculation at the specified index
       savedCalculations[editingIndex] = {
         merchant,
@@ -478,6 +528,7 @@ document.addEventListener("DOMContentLoaded", function () {
           min12MonthTotal,
           max12MonthTotal,
         },
+        favorite, // Preserve favorite status
         timestamp: new Date().toISOString(),
       };
 
@@ -514,6 +565,7 @@ document.addEventListener("DOMContentLoaded", function () {
             min12MonthTotal,
             max12MonthTotal,
           },
+          favorite: false, // Initialize favorite status for new calculations
           timestamp: new Date().toISOString(),
         };
 

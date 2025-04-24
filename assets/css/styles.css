@@ -13,13 +13,22 @@
     gap: 10px;
   }
   .accordion-button {
-    padding: 12px 15px;
+    padding: 0.75rem;
   }
   .accordion-body {
     padding: 15px;
   }
   .calculator {
     padding: 20px;
+  }
+  .project-info {
+    min-width: 150px;
+  }
+  .middleSection {
+    margin: 0 0.5rem !important;
+  }
+  .btn-group .btn {
+    padding: 0.25rem 0.5rem;
   }
 }
 
@@ -275,38 +284,86 @@ button {
 }
 
 .accordion-item {
-  border: none;
-  margin-bottom: 15px;
-  border-radius: 8px !important;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.5rem;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  background-color: #fff;
+}
+
+.accordion-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.favorite-item {
+  border: 2px solid #ffc107;
+  background-color: #fff8e1;
+}
+
+.accordion-button {
+  padding: 1rem;
+  background-color: #fff;
 }
 
 .accordion-button:not(.collapsed) {
-  background-color: #e9f7ef;
+  background-color: #f8f9fa;
+}
+
+.project-info {
+  min-width: 200px;
+}
+
+.merchant-name {
+  font-weight: 600;
   color: #006747;
 }
 
-.accordion-button:focus {
-  box-shadow: 0 0 0 0.25rem rgba(0, 103, 71, 0.25);
-  border-color: #006747;
+.project-name {
+  font-size: 0.9rem;
 }
 
-.accordion-body {
-  padding: 20px;
+.duration {
+  font-size: 0.9rem;
+  color: #666;
 }
 
-.list-group-item {
-  border-left: none;
-  border-right: none;
+.return-rate {
+  font-weight: 600;
 }
 
-.list-group-item:first-child {
-  border-top: none;
+.btn-outline-warning.active {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #000;
 }
 
-.list-group-item:last-child {
-  border-bottom: none;
+.btn-outline-warning.active i {
+  color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .accordion-button {
+    flex-wrap: wrap;
+  }
+
+  .project-info {
+    min-width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .middleSection {
+    width: 100%;
+    margin: 0.5rem 0 !important;
+    text-align: left;
+  }
+
+  .btn-group {
+    width: 100%;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
 }
 
 /* Hide install prompt on desktop */
@@ -319,4 +376,54 @@ button {
 /* Add spacing between delete and dropdown buttons */
 .accordion-button .btn-danger {
   margin-right: 10px;
+}
+
+/* Heart icon button styling */
+.btn-favorite {
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ffc107;
+  background-color: transparent;
+  color: #ffc107;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+
+.btn-favorite:hover {
+  background-color: #fff8e1;
+  border-color: #ffb300;
+  color: #ffb300;
+}
+
+.btn-favorite.active {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color: #fff;
+}
+
+.btn-favorite i {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Action buttons group */
+.btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-group .btn {
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
 }
