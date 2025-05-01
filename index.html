@@ -48,43 +48,74 @@
         </div>
 
         <form id="calculatorForm" class="needs-validation" novalidate autocomplete="off">
-          <div class="row mb-3">
-            <div class="col-md-6">
-              <label for="merchant" class="form-label"> <i class="bi bi-shop me-1"></i>Merchant </label>
-              <select id="merchant" class="form-select" autocomplete="off">
+          <!-- Merchant and Project Section -->
+          <div class="merchant-project-section mb-4">
+            <div class="form-group">
+              <label for="merchant" class="form-label"> <i class="bi bi-shop me-2"></i>Merchant </label>
+              <select id="merchant" class="form-select" required>
                 <option value="biniyog.io">biniyog.io</option>
                 <option value="iFarmer">iFarmer</option>
                 <option value="WeGro">WeGro</option>
               </select>
             </div>
 
-            <div class="col-md-6">
-              <label for="project" class="form-label"> <i class="bi bi-folder me-1"></i>Project </label>
-              <input type="text" id="project" class="form-control" placeholder="Enter project name" required autocomplete="off" />
+            <div class="form-group">
+              <label for="project" class="form-label"> <i class="bi bi-folder me-2"></i>Project </label>
+              <input type="text" id="project" class="form-control" placeholder="Enter project name" required />
             </div>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label"> <i class="bi bi-percent me-1"></i>Estimated Earning Percentage (%) </label>
-            <div class="row g-3">
-              <div class="col-sm-6">
-                <input type="number" id="minEarning" class="form-control" placeholder="Min (e.g. 9)" step="0.1" min="0" max="100" required autocomplete="off" />
+          <!-- Profit Rate Section -->
+          <div class="form-group mb-4">
+            <label class="form-label"> <i class="bi bi-percent me-2"></i>Estimated Earning Percentage (%) </label>
+
+            <!-- Rate Type Selection -->
+            <div class="btn-group w-100 mb-3" role="group" aria-label="Rate type">
+              <input type="radio" class="btn-check" name="rateType" id="projectRate" value="project" checked />
+              <label class="btn btn-outline-primary" for="projectRate">Project Duration Rate</label>
+
+              <input type="radio" class="btn-check" name="rateType" id="annualRate" value="annual" />
+              <label class="btn btn-outline-primary" for="annualRate">Annual Rate</label>
+            </div>
+
+            <!-- Rate Input Fields -->
+            <div id="profitInputs">
+              <!-- Project Rate Input -->
+              <div id="projectRateInput" class="row g-3">
+                <div class="col-6">
+                  <input type="number" id="minProjectRate" class="form-control" placeholder="Min rate" step="0.1" min="0" max="100" />
+                </div>
+                <div class="col-6">
+                  <input type="number" id="maxProjectRate" class="form-control" placeholder="Max rate" step="0.1" min="0" max="100" />
+                </div>
               </div>
-              <div class="col-sm-6">
-                <input type="number" id="maxEarning" class="form-control" placeholder="Max (e.g. 10)" step="0.1" min="0" max="100" required autocomplete="off" />
+
+              <!-- Annual Rate Input -->
+              <div id="annualRateInput" class="row g-3" style="display: none">
+                <div class="col-6">
+                  <input type="number" id="minAnnualRate" class="form-control" placeholder="Min rate" step="0.1" min="0" max="100" />
+                </div>
+                <div class="col-6">
+                  <input type="number" id="maxAnnualRate" class="form-control" placeholder="Max rate" step="0.1" min="0" max="100" />
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="row mb-3">
+          <!-- Duration and Investment Section -->
+          <div class="row g-4 mb-4">
             <div class="col-md-6">
-              <label for="duration" class="form-label"> <i class="bi bi-calendar-month me-1"></i>Project Duration (Months) </label>
-              <input type="number" id="duration" class="form-control" placeholder="Enter months (e.g. 7)" min="1" max="60" required autocomplete="off" />
+              <div class="form-group">
+                <label for="duration" class="form-label"> <i class="bi bi-calendar-month me-2"></i>Project Duration (Months) </label>
+                <input type="number" id="duration" class="form-control" placeholder="Enter months (e.g. 7)" min="1" max="60" required />
+              </div>
             </div>
 
             <div class="col-md-6">
-              <label for="investment" class="form-label"> <i class="bi bi-currency-dollar me-1"></i>Investment Amount (BDT) </label>
-              <input type="number" id="investment" class="form-control" placeholder="Enter your investment amount in BDT" min="1" required autocomplete="off" />
+              <div class="form-group">
+                <label for="investment" class="form-label"> <i class="bi bi-currency-dollar me-2"></i>Investment Amount (BDT) </label>
+                <input type="number" id="investment" class="form-control" placeholder="Enter your investment amount in BDT" min="1" required />
+              </div>
             </div>
           </div>
 
@@ -94,12 +125,12 @@
         </form>
 
         <div class="results mt-5" id="results" style="display: none">
-          <div class="row g-4">
+          <div class="row g-4 mb-4">
             <div class="col-md-4">
               <div class="card h-100 result-card">
                 <div class="card-body">
-                  <h5 class="card-title"><i class="bi bi-graph-up me-2"></i>Yearly Return Rate</h5>
-                  <p class="card-text result-value" id="yearlyReturnRateRange">0% - 0%</p>
+                  <h5 class="card-title"><i class="bi bi-graph-up me-2"></i>Project Return (<span id="projectDuration">0</span> months)</h5>
+                  <p class="card-text result-value text-success" id="projectReturn">0.00% - 0.00%</p>
                   <p class="card-text text-muted">Based on your estimated earning percentage range</p>
                 </div>
               </div>
@@ -129,7 +160,16 @@
           <div class="mt-5">
             <h2 class="text-center mb-4"><i class="bi bi-graph-up-arrow me-2"></i>12 Months Projection</h2>
             <div class="row g-4">
-              <div class="col-md-6">
+              <div class="col-md-4">
+                <div class="card h-100 result-card projection">
+                  <div class="card-body">
+                    <h5 class="card-title"><i class="bi bi-graph-up me-2"></i>Yearly Return Rate</h5>
+                    <p class="card-text result-value text-success" id="yearlyReturnRate">0.00% - 0.00%</p>
+                    <p class="card-text text-muted">Projected annual return rate</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
                 <div class="card h-100 result-card projection">
                   <div class="card-body">
                     <h5 class="card-title"><i class="bi bi-cash me-2"></i>Estimated Profit</h5>
@@ -138,8 +178,7 @@
                   </div>
                 </div>
               </div>
-
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="card h-100 result-card projection">
                   <div class="card-body">
                     <h5 class="card-title"><i class="bi bi-wallet2 me-2"></i>Total Return</h5>

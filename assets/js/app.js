@@ -26,7 +26,9 @@ document.addEventListener("DOMContentLoaded", function () {
   // Check if already installed as PWA and hide install prompt if needed
   if (isPWAInstalled()) {
     const installPrompt = document.getElementById("installPrompt");
-    installPrompt.style.display = "none";
+    if (installPrompt) {
+      installPrompt.style.display = "none";
+    }
   }
 
   // PWA Install Prompt - only for mobile and tablet
@@ -75,10 +77,87 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Register service worker for PWA functionality
-  if ("serviceWorker" in navigator) {
+  // Initialize form elements
+  const calculatorForm = document.getElementById("calculatorForm");
+  const saveButton = document.getElementById("saveCalculation");
+  const resetButton = document.getElementById("resetCalculator");
+  const rateTypeInputs = document.getElementsByName("rateType");
+
+  // Add event listeners if elements exist
+  if (calculatorForm) {
+    calculatorForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      calculateResults();
+    });
+  }
+
+  if (saveButton) {
+    saveButton.addEventListener("click", saveCurrentCalculation);
+  }
+
+  if (resetButton) {
+    resetButton.addEventListener("click", function () {
+      const merchantSelect = document.getElementById("merchant");
+      const projectInput = document.getElementById("project");
+      const durationInput = document.getElementById("duration");
+      const investmentInput = document.getElementById("investment");
+      const resultsSection = document.getElementById("results");
+
+      // Reset form fields
+      if (merchantSelect) merchantSelect.value = "biniyog.io";
+      if (projectInput) projectInput.value = "";
+      if (durationInput) durationInput.value = "";
+      if (investmentInput) investmentInput.value = "";
+
+      // Reset rate inputs based on current rate type
+      const rateType = getSelectedRateType();
+      if (rateType === "project") {
+        const minProjectRate = document.getElementById("minProjectRate");
+        const maxProjectRate = document.getElementById("maxProjectRate");
+        if (minProjectRate) minProjectRate.value = "";
+        if (maxProjectRate) maxProjectRate.value = "";
+      } else {
+        const minAnnualRate = document.getElementById("minAnnualRate");
+        const maxAnnualRate = document.getElementById("maxAnnualRate");
+        if (minAnnualRate) minAnnualRate.value = "";
+        if (maxAnnualRate) maxAnnualRate.value = "";
+      }
+
+      // Hide results and reset state
+      if (resultsSection) resultsSection.style.display = "none";
+      localStorage.removeItem("editingIndex");
+
+      // Reset calculate button text
+      const calculateButton = document.getElementById("calculate");
+      if (calculateButton) {
+        calculateButton.innerHTML = '<i class="bi bi-calculator me-2"></i>Calculate Profit';
+      }
+
+      // Focus on project input
+      if (projectInput) projectInput.focus();
+    });
+  }
+
+  // Add event listeners for rate type changes
+  if (rateTypeInputs.length > 0) {
+    Array.from(rateTypeInputs).forEach((radio) => {
+      radio.addEventListener("change", updateRateInputs);
+    });
+  }
+
+  // Initialize rate inputs display
+  updateRateInputs();
+
+  // Display saved calculations on page load
+  try {
+    displaySavedCalculations();
+  } catch (error) {
+    console.error("Error displaying saved calculations:", error);
+  }
+
+  // Register service worker only if protocol is https or http
+  if ("serviceWorker" in navigator && (window.location.protocol === "https:" || window.location.protocol === "http:")) {
     window.addEventListener("load", () => {
-      // Use try-catch to handle errors gracefully
       try {
         navigator.serviceWorker
           .register("./service-worker.js")
@@ -146,18 +225,35 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to display saved calculations
   function displaySavedCalculations() {
     const savedCalculationsList = document.getElementById("savedCalculationsList");
+    if (!savedCalculationsList) {
+      console.error("Could not find savedCalculationsList element");
+      return;
+    }
+
     savedCalculationsList.innerHTML = ""; // Clear existing content
 
     try {
       // Get saved calculations from localStorage
-      const savedCalculations = JSON.parse(localStorage.getItem("savedCalculations") || "[]");
+      let savedCalculations = [];
+      try {
+        savedCalculations = JSON.parse(localStorage.getItem("savedCalculations") || "[]");
+      } catch (e) {
+        console.error("Error parsing saved calculations:", e);
+        savedCalculations = [];
+      }
 
       // Filter out expired calculations (older than 30 days)
       const currentDate = new Date();
       const validCalculations = savedCalculations.filter((calc) => {
-        const calcDate = new Date(calc.timestamp);
-        const daysDiff = (currentDate - calcDate) / (1000 * 60 * 60 * 24);
-        return daysDiff <= 30;
+        if (!calc || !calc.timestamp) return false;
+        try {
+          const calcDate = new Date(calc.timestamp);
+          const daysDiff = (currentDate - calcDate) / (1000 * 60 * 60 * 24);
+          return daysDiff <= 30;
+        } catch (e) {
+          console.error("Error processing calculation date:", e);
+          return false;
+        }
       });
 
       // Update localStorage with only valid calculations
@@ -172,166 +268,175 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Create accordion items for each saved calculation
       validCalculations.forEach((calc, index) => {
-        const accordionItem = document.createElement("div");
-        accordionItem.className = "accordion-item";
-        if (calc.favorite) {
-          accordionItem.classList.add("favorite-item");
+        if (!calc || !calc.results || !calc.inputs) {
+          console.error("Invalid calculation data:", calc);
+          return;
         }
 
-        const accordionHeader = document.createElement("h2");
-        accordionHeader.className = "accordion-header";
-        accordionHeader.id = `heading${index}`;
+        try {
+          const accordionItem = document.createElement("div");
+          accordionItem.className = "accordion-item";
+          if (calc.favorite) {
+            accordionItem.classList.add("favorite-item");
+          }
 
-        const accordionButton = document.createElement("button");
-        accordionButton.className = "accordion-button collapsed";
-        accordionButton.type = "button";
-        accordionButton.setAttribute("data-bs-toggle", "collapse");
-        accordionButton.setAttribute("data-bs-target", `#collapse${index}`);
-        accordionButton.setAttribute("aria-expanded", "false");
-        accordionButton.setAttribute("aria-controls", `collapse${index}`);
+          // Create header content with a better layout
+          const headerContent = document.createElement("div");
+          headerContent.className = "d-flex justify-content-between align-items-center w-100";
 
-        // Create header content with a better layout
-        const headerContent = document.createElement("div");
-        headerContent.className = "d-flex justify-content-between align-items-center w-100";
-
-        // Create left section with merchant and project info
-        const leftSection = document.createElement("div");
-        leftSection.className = "d-flex align-items-center";
-        leftSection.innerHTML = `
-          <div class="project-info">
-            <div class="merchant-name"><i class="bi bi-shop me-2"></i>${calc.merchant}</div>
-            <div class="project-name text-muted">${calc.project}</div>
-          </div>
-        `;
-
-        // Create middle section with duration and return rate
-        const middleSection = document.createElement("div");
-        middleSection.className = "text-center mx-4";
-        middleSection.innerHTML = `
-          <div class="duration"><i class="bi bi-calendar-month me-1"></i>${calc.inputs.duration} months</div>
-          <div class="return-rate text-success">${calc.results.minYearlyReturnRate.toFixed(2)}% - ${calc.results.maxYearlyReturnRate.toFixed(2)}% yearly</div>
-        `;
-
-        // Create button group for actions
-        const buttonGroup = document.createElement("div");
-        buttonGroup.className = "btn-group ms-2";
-
-        const favoriteButton = document.createElement("button");
-        favoriteButton.className = `btn btn-favorite ${calc.favorite ? "active" : ""}`;
-        favoriteButton.innerHTML = `<i class="bi bi-heart${calc.favorite ? "-fill" : ""}"></i>`;
-        favoriteButton.setAttribute("title", calc.favorite ? "Remove from favorites" : "Add to favorites");
-        favoriteButton.onclick = function (e) {
-          e.stopPropagation(); // Prevent accordion from toggling
-          toggleFavorite(index);
-        };
-
-        const editButton = document.createElement("button");
-        editButton.className = "btn btn-primary";
-        editButton.innerHTML = '<i class="bi bi-pencil"></i>';
-        editButton.setAttribute("title", "Edit this calculation");
-        editButton.onclick = function (e) {
-          e.stopPropagation(); // Prevent accordion from toggling
-          editCalculation(index, calc);
-        };
-
-        const deleteButton = document.createElement("button");
-        deleteButton.className = "btn btn-danger";
-        deleteButton.innerHTML = '<i class="bi bi-trash"></i>';
-        deleteButton.setAttribute("title", "Delete this calculation");
-        deleteButton.onclick = function (e) {
-          e.stopPropagation(); // Prevent accordion from toggling
-          deleteCalculation(index);
-        };
-
-        buttonGroup.appendChild(favoriteButton);
-        buttonGroup.appendChild(editButton);
-        buttonGroup.appendChild(deleteButton);
-
-        headerContent.appendChild(leftSection);
-        headerContent.appendChild(middleSection);
-        headerContent.appendChild(buttonGroup);
-        accordionButton.appendChild(headerContent);
-        accordionHeader.appendChild(accordionButton);
-
-        const accordionCollapse = document.createElement("div");
-        accordionCollapse.id = `collapse${index}`;
-        accordionCollapse.className = "accordion-collapse collapse";
-        accordionCollapse.setAttribute("aria-labelledby", `heading${index}`);
-        accordionCollapse.setAttribute("data-bs-parent", "#savedCalculationsList");
-
-        const accordionBody = document.createElement("div");
-        accordionBody.className = "accordion-body";
-
-        // Create detailed content for the accordion body
-        const detailsContent = document.createElement("div");
-        detailsContent.innerHTML = `
-          <div class="row">
-            <div class="col-md-6">
-              <h5><i class="bi bi-info-circle me-2"></i>Input Details</h5>
-              <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><i class="bi bi-shop me-2"></i>Merchant:</span>
-                  <span class="fw-bold">${calc.merchant}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><i class="bi bi-folder me-2"></i>Project:</span>
-                  <span class="fw-bold">${calc.project}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><i class="bi bi-percent me-2"></i>Earning Percentage:</span>
-                  <span class="fw-bold">${calc.inputs.minEarning}% - ${calc.inputs.maxEarning}%</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><i class="bi bi-calendar-month me-2"></i>Duration:</span>
-                  <span class="fw-bold">${calc.inputs.duration} months</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><i class="bi bi-currency-dollar me-2"></i>Investment Amount:</span>
-                  <span class="fw-bold">${formatBDCurrency(calc.inputs.investment)}</span>
-                </li>
-              </ul>
+          // Create left section with merchant and project info
+          const leftSection = document.createElement("div");
+          leftSection.className = "d-flex align-items-center";
+          leftSection.innerHTML = `
+            <div class="project-info">
+              <div class="merchant-name"><i class="bi bi-shop me-2"></i>${calc.merchant || "Unknown Merchant"}</div>
+              <div class="project-name text-muted">${calc.project || "Unnamed Project"}</div>
             </div>
-            <div class="col-md-6">
-              <h5><i class="bi bi-graph-up me-2"></i>Results</h5>
-              <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><i class="bi bi-graph-up me-2"></i>Yearly Return Rate:</span>
-                  <span class="fw-bold text-success">${calc.results.minYearlyReturnRate.toFixed(2)}% - ${calc.results.maxYearlyReturnRate.toFixed(2)}%</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><i class="bi bi-cash-stack me-2"></i>Total Profit:</span>
-                  <span class="fw-bold">${formatBDCurrency(calc.results.minTotalProfit)} - ${formatBDCurrency(calc.results.maxTotalProfit)}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><i class="bi bi-bank me-2"></i>Total Return:</span>
-                  <span class="fw-bold">${formatBDCurrency(calc.results.minFinalValue)} - ${formatBDCurrency(calc.results.maxFinalValue)}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><i class="bi bi-cash me-2"></i>12-Month Projection:</span>
-                  <span class="fw-bold">${formatBDCurrency(calc.results.min12MonthProfit)} - ${formatBDCurrency(calc.results.max12MonthProfit)}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                  <span><i class="bi bi-wallet2 me-2"></i>12-Month Total Return:</span>
-                  <span class="fw-bold">${formatBDCurrency(calc.results.min12MonthTotal)} - ${formatBDCurrency(calc.results.max12MonthTotal)}</span>
-                </li>
-              </ul>
+          `;
+
+          // Create middle section with duration and return rate
+          const middleSection = document.createElement("div");
+          middleSection.className = "text-center mx-4";
+          middleSection.innerHTML = `
+            <div class="duration"><i class="bi bi-calendar-month me-1"></i>${calc.inputs.duration || 0} months</div>
+            <div class="return-rate text-success">${(calc.results.minYearlyReturnRate || 0).toFixed(2)}% - ${(calc.results.maxYearlyReturnRate || 0).toFixed(2)}% yearly</div>
+          `;
+
+          // Create button group for actions
+          const buttonGroup = document.createElement("div");
+          buttonGroup.className = "btn-group ms-2";
+
+          const favoriteButton = document.createElement("button");
+          favoriteButton.className = `btn btn-favorite ${calc.favorite ? "active" : ""}`;
+          favoriteButton.innerHTML = `<i class="bi bi-heart${calc.favorite ? "-fill" : ""}"></i>`;
+          favoriteButton.setAttribute("title", calc.favorite ? "Remove from favorites" : "Add to favorites");
+          favoriteButton.onclick = function (e) {
+            e.stopPropagation();
+            toggleFavorite(index);
+          };
+
+          const editButton = document.createElement("button");
+          editButton.className = "btn btn-primary";
+          editButton.innerHTML = '<i class="bi bi-pencil"></i>';
+          editButton.setAttribute("title", "Edit this calculation");
+          editButton.onclick = function (e) {
+            e.stopPropagation();
+            editCalculation(index, calc);
+          };
+
+          const deleteButton = document.createElement("button");
+          deleteButton.className = "btn btn-danger";
+          deleteButton.innerHTML = '<i class="bi bi-trash"></i>';
+          deleteButton.setAttribute("title", "Delete this calculation");
+          deleteButton.onclick = function (e) {
+            e.stopPropagation();
+            deleteCalculation(index);
+          };
+
+          buttonGroup.appendChild(favoriteButton);
+          buttonGroup.appendChild(editButton);
+          buttonGroup.appendChild(deleteButton);
+
+          headerContent.appendChild(leftSection);
+          headerContent.appendChild(middleSection);
+          headerContent.appendChild(buttonGroup);
+
+          // Create the accordion header and body
+          const accordionHeader = document.createElement("h2");
+          accordionHeader.className = "accordion-header";
+          accordionHeader.id = `heading${index}`;
+
+          const accordionButton = document.createElement("button");
+          accordionButton.className = "accordion-button collapsed";
+          accordionButton.type = "button";
+          accordionButton.setAttribute("data-bs-toggle", "collapse");
+          accordionButton.setAttribute("data-bs-target", `#collapse${index}`);
+          accordionButton.setAttribute("aria-expanded", "false");
+          accordionButton.setAttribute("aria-controls", `collapse${index}`);
+          accordionButton.appendChild(headerContent);
+
+          accordionHeader.appendChild(accordionButton);
+
+          const accordionCollapse = document.createElement("div");
+          accordionCollapse.id = `collapse${index}`;
+          accordionCollapse.className = "accordion-collapse collapse";
+          accordionCollapse.setAttribute("aria-labelledby", `heading${index}`);
+          accordionCollapse.setAttribute("data-bs-parent", "#savedCalculationsList");
+
+          const accordionBody = document.createElement("div");
+          accordionBody.className = "accordion-body";
+
+          // Create detailed content for the accordion body
+          const detailsContent = document.createElement("div");
+          detailsContent.innerHTML = `
+            <div class="row">
+              <div class="col-md-6">
+                <h5><i class="bi bi-info-circle me-2"></i>Input Details</h5>
+                <ul class="list-group mb-3">
+                  <li class="list-group-item d-flex justify-content-between">
+                    <span><i class="bi bi-shop me-2"></i>Merchant:</span>
+                    <span class="fw-bold">${calc.merchant || "Unknown"}</span>
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between">
+                    <span><i class="bi bi-folder me-2"></i>Project:</span>
+                    <span class="fw-bold">${calc.project || "Unnamed"}</span>
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between">
+                    <span><i class="bi bi-percent me-2"></i>Earning Percentage:</span>
+                    <span class="fw-bold">${(calc.inputs.minEarning || 0).toFixed(2)}% - ${(calc.inputs.maxEarning || 0).toFixed(2)}%</span>
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between">
+                    <span><i class="bi bi-calendar-month me-2"></i>Duration:</span>
+                    <span class="fw-bold">${calc.inputs.duration || 0} months</span>
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between">
+                    <span><i class="bi bi-currency-dollar me-2"></i>Investment Amount:</span>
+                    <span class="fw-bold">${formatBDCurrency(calc.inputs.investment || 0)}</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-md-6">
+                <h5><i class="bi bi-graph-up me-2"></i>Results</h5>
+                <ul class="list-group mb-3">
+                  <li class="list-group-item d-flex justify-content-between">
+                    <span><i class="bi bi-graph-up me-2"></i>Yearly Return Rate:</span>
+                    <span class="fw-bold text-success">${(calc.results.minYearlyReturnRate || 0).toFixed(2)}% - ${(calc.results.maxYearlyReturnRate || 0).toFixed(2)}%</span>
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between">
+                    <span><i class="bi bi-cash-stack me-2"></i>Total Profit:</span>
+                    <span class="fw-bold">${formatBDCurrency(calc.results.minTotalProfit || 0)} - ${formatBDCurrency(calc.results.maxTotalProfit || 0)}</span>
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between">
+                    <span><i class="bi bi-bank me-2"></i>Total Return:</span>
+                    <span class="fw-bold">${formatBDCurrency(calc.results.minFinalValue || 0)} - ${formatBDCurrency(calc.results.maxFinalValue || 0)}</span>
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between">
+                    <span><i class="bi bi-cash me-2"></i>12-Month Projection:</span>
+                    <span class="fw-bold">${formatBDCurrency(calc.results.min12MonthProfit || 0)} - ${formatBDCurrency(calc.results.max12MonthProfit || 0)}</span>
+                  </li>
+                  <li class="list-group-item d-flex justify-content-between">
+                    <span><i class="bi bi-wallet2 me-2"></i>12-Month Total Return:</span>
+                    <span class="fw-bold">${formatBDCurrency(calc.results.min12MonthTotal || 0)} - ${formatBDCurrency(calc.results.max12MonthTotal || 0)}</span>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </div>
-          <div class="text-muted mt-2">
-            <small><i class="bi bi-clock me-1"></i>Calculated on: ${formatDate(calc.timestamp)}</small>
-          </div>
-        `;
+            <div class="text-muted mt-2">
+              <small><i class="bi bi-clock me-1"></i>Calculated on: ${formatDate(calc.timestamp)}</small>
+            </div>
+          `;
 
-        accordionBody.appendChild(detailsContent);
-        accordionCollapse.appendChild(accordionBody);
-
-        accordionItem.appendChild(accordionHeader);
-        accordionItem.appendChild(accordionCollapse);
-
-        savedCalculationsList.appendChild(accordionItem);
+          accordionBody.appendChild(detailsContent);
+          accordionCollapse.appendChild(accordionBody);
+          accordionItem.appendChild(accordionHeader);
+          accordionItem.appendChild(accordionCollapse);
+          savedCalculationsList.appendChild(accordionItem);
+        } catch (error) {
+          console.error("Error creating accordion item:", error);
+        }
       });
-    } catch (e) {
-      console.log("Error displaying saved calculations:", e);
+    } catch (error) {
+      console.error("Error displaying saved calculations:", error);
       savedCalculationsList.innerHTML = '<div class="text-center p-3 text-danger">Error loading saved calculations.</div>';
     }
   }
@@ -375,47 +480,257 @@ document.addEventListener("DOMContentLoaded", function () {
     calculateButton.innerHTML = '<i class="bi bi-save me-2"></i>Update Calculation';
   }
 
+  // Get DOM elements
+  const merchantSelect = document.getElementById("merchantSelect");
+  const projectInput = document.getElementById("projectInput");
+  const fixedEarning = document.getElementById("fixedEarning");
+  const minEarning = document.getElementById("minEarning");
+  const maxEarning = document.getElementById("maxEarning");
+  const minAnnualEarning = document.getElementById("minAnnualEarning");
+  const maxAnnualEarning = document.getElementById("maxAnnualEarning");
+  const duration = document.getElementById("duration");
+  const amount = document.getElementById("amount");
+  const profitTypeRadios = document.getElementsByName("profitType");
+  const profitInputs = {
+    fixed: document.getElementById("fixedProfitInput"),
+    range: document.getElementById("rangeProfitInput"),
+    annual: document.getElementById("annualProfitInput"),
+  };
+
+  // Handle profit type selection
+  profitTypeRadios.forEach((radio) => {
+    radio.addEventListener("change", (e) => {
+      // Hide all profit inputs first
+      Object.values(profitInputs).forEach((input) => (input.style.display = "none"));
+
+      // Show the selected profit input
+      profitInputs[e.target.value].style.display = e.target.value === "fixed" ? "block" : "flex";
+
+      // Clear other input values
+      if (e.target.value === "fixed") {
+        minEarning.value = "";
+        maxEarning.value = "";
+        minAnnualEarning.value = "";
+        maxAnnualEarning.value = "";
+      } else if (e.target.value === "range") {
+        fixedEarning.value = "";
+        minAnnualEarning.value = "";
+        maxAnnualEarning.value = "";
+      } else if (e.target.value === "annual") {
+        fixedEarning.value = "";
+        minEarning.value = "";
+        maxEarning.value = "";
+      }
+
+      // Recalculate if all required fields are filled
+      calculateProfit();
+    });
+  });
+
+  function getSelectedProfitType() {
+    const selectedRadio = document.querySelector('input[name="rateType"]:checked');
+    return selectedRadio?.value || "project"; // default to project if none selected
+  }
+
+  function getEarningValues() {
+    const profitType = getSelectedProfitType();
+    let min = 0,
+      max = 0;
+
+    switch (profitType) {
+      case "fixed":
+        min = max = parseFloat(fixedEarning.value) || 0;
+        break;
+      case "range":
+        min = parseFloat(minEarning.value) || 0;
+        max = parseFloat(maxEarning.value) || 0;
+        break;
+      case "annual":
+        // Convert annual rate to project rate
+        const months = parseFloat(duration.value) || 0;
+        min = parseFloat(minAnnualEarning.value) || 0;
+        max = parseFloat(maxAnnualEarning.value) || 0;
+        min = (min / 12) * months;
+        max = (max / 12) * months;
+        break;
+    }
+
+    return { min, max };
+  }
+
+  function calculateProfit() {
+    const profitType = getSelectedProfitType();
+    const earningValues = getEarningValues();
+    const durationValue = parseFloat(duration.value) || 0;
+    const amountValue = parseFloat(amount.value) || 0;
+
+    // Check if required fields are filled
+    if (!validateInputs()) {
+      clearResults();
+      return;
+    }
+
+    // Calculate profits
+    const minProfit = (amountValue * earningValues.min) / 100;
+    const maxProfit = (amountValue * earningValues.max) / 100;
+
+    // Calculate annual returns for display
+    let annualMin = (earningValues.min / durationValue) * 12;
+    let annualMax = (earningValues.max / durationValue) * 12;
+
+    // Update UI
+    updateResults(earningValues.min, earningValues.max, minProfit, maxProfit, annualMin, annualMax);
+  }
+
+  // Function to validate inputs
+  function validateInputs() {
+    try {
+      const merchant = document.getElementById("merchant")?.value;
+      const project = document.getElementById("project")?.value;
+      const duration = parseFloat(document.getElementById("duration")?.value);
+      const investment = parseFloat(document.getElementById("investment")?.value);
+      const rateType = getSelectedRateType();
+
+      if (!merchant || !project || !duration || !investment) {
+        return false;
+      }
+
+      if (rateType === "project") {
+        const minRate = parseFloat(document.getElementById("minProjectRate")?.value);
+        const maxRate = parseFloat(document.getElementById("maxProjectRate")?.value);
+        return !isNaN(minRate) && !isNaN(maxRate);
+      } else {
+        const minRate = parseFloat(document.getElementById("minAnnualRate")?.value);
+        const maxRate = parseFloat(document.getElementById("maxAnnualRate")?.value);
+        return !isNaN(minRate) && !isNaN(maxRate);
+      }
+    } catch (error) {
+      console.error("Error validating inputs:", error);
+      return false;
+    }
+  }
+
+  // Function to calculate results
+  function calculateResults() {
+    try {
+      if (!validateInputs()) {
+        alert("Please fill in all required fields with valid values.");
+        return;
+      }
+
+      const investment = parseFloat(document.getElementById("investment")?.value) || 0;
+      const duration = parseFloat(document.getElementById("duration")?.value) || 0;
+      const rates = getProfitRates();
+
+      if (!rates) {
+        console.error("Invalid rates calculated");
+        return;
+      }
+
+      // Calculate profits
+      const minTotalProfit = (investment * rates.projectMin) / 100;
+      const maxTotalProfit = (investment * rates.projectMax) / 100;
+
+      // Calculate final values
+      const minFinalValue = investment + minTotalProfit;
+      const maxFinalValue = investment + maxTotalProfit;
+
+      // Calculate 12-month projection
+      const min12MonthProfit = (investment * rates.annualMin) / 100;
+      const max12MonthProfit = (investment * rates.annualMax) / 100;
+      const min12MonthTotal = investment + min12MonthProfit;
+      const max12MonthTotal = investment + max12MonthProfit;
+
+      // Update UI safely
+      const updateElement = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+      };
+
+      updateElement("projectDuration", duration);
+      updateElement("projectReturn", `${rates.projectMin.toFixed(2)}% - ${rates.projectMax.toFixed(2)}%`);
+      updateElement("displayDuration", duration);
+      updateElement("displayDuration2", duration);
+      updateElement("yearlyReturnRate", `${rates.annualMin.toFixed(2)}% - ${rates.annualMax.toFixed(2)}%`);
+      updateElement("totalProfitRange", `${formatBDCurrency(minTotalProfit)} - ${formatBDCurrency(maxTotalProfit)}`);
+      updateElement("finalValueRange", `${formatBDCurrency(minFinalValue)} - ${formatBDCurrency(maxFinalValue)}`);
+      updateElement("twelveMonthRange", `${formatBDCurrency(min12MonthProfit)} - ${formatBDCurrency(max12MonthProfit)}`);
+      updateElement("twelveMonthTotalRange", `${formatBDCurrency(min12MonthTotal)} - ${formatBDCurrency(max12MonthTotal)}`);
+
+      // Show results section
+      const resultsSection = document.getElementById("results");
+      if (resultsSection) resultsSection.style.display = "block";
+    } catch (error) {
+      console.error("Error calculating results:", error);
+      alert("An error occurred while calculating results. Please check your inputs and try again.");
+    }
+  }
+
   // Function to save the current calculation
   function saveCurrentCalculation() {
     try {
-      const merchant = document.getElementById("merchant").value;
-      const project = document.getElementById("project").value;
+      const merchant = document.getElementById("merchant")?.value;
+      const project = document.getElementById("project")?.value;
+      const duration = document.getElementById("duration")?.value;
+      const investment = document.getElementById("investment")?.value;
 
-      if (!project) {
-        alert("Please enter a project name before saving.");
+      if (!merchant || !project || !duration || !investment) {
+        alert("Please fill in all required fields before saving.");
         return;
       }
 
-      // Get the current calculation data from localStorage
-      const currentCalculation = JSON.parse(localStorage.getItem("currentCalculation") || "{}");
-
-      if (!currentCalculation.inputs) {
-        alert("Please calculate the results before saving.");
+      const rates = getProfitRates();
+      if (!rates) {
+        alert("Please enter valid profit rates before saving.");
         return;
       }
 
-      // Add merchant and project to the calculation data
-      currentCalculation.merchant = merchant;
-      currentCalculation.project = project;
-      currentCalculation.favorite = false; // Initialize favorite status
+      const calculationData = {
+        merchant,
+        project,
+        timestamp: new Date().toISOString(),
+        inputs: {
+          duration: parseFloat(duration),
+          investment: parseFloat(investment),
+          minEarning: rates.projectMin,
+          maxEarning: rates.projectMax,
+        },
+        results: {
+          minYearlyReturnRate: rates.annualMin,
+          maxYearlyReturnRate: rates.annualMax,
+          minTotalProfit: (parseFloat(investment) * rates.projectMin) / 100,
+          maxTotalProfit: (parseFloat(investment) * rates.projectMax) / 100,
+          minFinalValue: parseFloat(investment) + (parseFloat(investment) * rates.projectMin) / 100,
+          maxFinalValue: parseFloat(investment) + (parseFloat(investment) * rates.projectMax) / 100,
+          min12MonthProfit: (parseFloat(investment) * rates.annualMin) / 100,
+          max12MonthProfit: (parseFloat(investment) * rates.annualMax) / 100,
+          min12MonthTotal: parseFloat(investment) + (parseFloat(investment) * rates.annualMin) / 100,
+          max12MonthTotal: parseFloat(investment) + (parseFloat(investment) * rates.annualMax) / 100,
+        },
+        favorite: false,
+      };
 
       // Get existing saved calculations
-      const savedCalculations = JSON.parse(localStorage.getItem("savedCalculations") || "[]");
+      let savedCalculations = [];
+      try {
+        savedCalculations = JSON.parse(localStorage.getItem("savedCalculations") || "[]");
+      } catch (e) {
+        console.error("Error parsing saved calculations:", e);
+        savedCalculations = [];
+      }
 
       // Check if a calculation with the same project name already exists
       const existingIndex = savedCalculations.findIndex((calc) => calc.merchant === merchant && calc.project === project);
 
       if (existingIndex !== -1) {
         if (confirm("A calculation with this project name already exists. Do you want to update it?")) {
-          // Preserve favorite status when updating
-          currentCalculation.favorite = savedCalculations[existingIndex].favorite || false;
-          savedCalculations[existingIndex] = currentCalculation;
+          calculationData.favorite = savedCalculations[existingIndex].favorite || false;
+          savedCalculations[existingIndex] = calculationData;
         } else {
           return;
         }
       } else {
-        // Add the current calculation to the beginning of the array
-        savedCalculations.unshift(currentCalculation);
+        savedCalculations.unshift(calculationData);
       }
 
       // Update localStorage
@@ -428,188 +743,93 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Calculation saved successfully!");
 
       // Reset the form
-      document.getElementById("resetCalculator").click();
+      const resetButton = document.getElementById("resetCalculator");
+      if (resetButton) {
+        resetButton.click();
+      }
     } catch (e) {
-      console.log("Error saving calculation:", e);
+      console.error("Error saving calculation:", e);
       alert("Error saving calculation. Please try again.");
     }
   }
 
-  // Calculator functionality
-  const calculateForm = document.getElementById("calculatorForm");
+  // Add event listener for rate type toggle
+  document.getElementById("isAnnualRate").addEventListener("change", function () {
+    const minInput = document.getElementById("minEarning");
+    const maxInput = document.getElementById("maxEarning");
+    const isAnnual = this.checked;
 
-  calculateForm.addEventListener("submit", function (e) {
-    e.preventDefault(); // Prevent form submission
-    calculateResults();
+    // Update placeholders based on rate type
+    minInput.placeholder = isAnnual ? "Min annual rate (e.g. 17)" : "Min project rate (e.g. 9)";
+    maxInput.placeholder = isAnnual ? "Max annual rate (e.g. 18)" : "Max project rate (e.g. 10)";
+
+    // Clear existing values
+    minInput.value = "";
+    maxInput.value = "";
   });
 
-  function calculateResults() {
-    // Get input values
-    const merchant = document.getElementById("merchant").value;
-    const project = document.getElementById("project").value;
-    const minEarning = parseFloat(document.getElementById("minEarning").value) || 0;
-    const maxEarning = parseFloat(document.getElementById("maxEarning").value) || 0;
-    const duration = parseInt(document.getElementById("duration").value) || 0;
-    const investment = parseFloat(document.getElementById("investment").value) || 0;
-
-    // Validate inputs
-    if (minEarning <= 0 || maxEarning <= 0 || duration <= 0 || investment <= 0) {
-      alert("Please enter valid positive numbers for all fields.");
-      return;
-    }
-
-    if (minEarning > maxEarning) {
-      alert("Minimum earning percentage cannot be greater than maximum.");
-      return;
-    }
-
-    // Update duration display in results
-    document.getElementById("displayDuration").textContent = duration;
-    document.getElementById("displayDuration2").textContent = duration;
-
-    // Calculate min and max profit based on EEP percentages over the project duration
-    // EEP is for the entire duration, not per month
-    const minTotalProfit = investment * (minEarning / 100);
-    const maxTotalProfit = investment * (maxEarning / 100);
-
-    // Calculate min and max final investment value after project completion
-    const minFinalValue = investment + minTotalProfit;
-    const maxFinalValue = investment + maxTotalProfit;
-
-    // Calculate yearly return rates (simple doubling for exact 6-month periods)
-    const minYearlyReturnRate = duration === 6 ? minEarning * 2 : minEarning * (12 / duration);
-    const maxYearlyReturnRate = duration === 6 ? maxEarning * 2 : maxEarning * (12 / duration);
-
-    // Calculate 12-month projections
-    const min12MonthProfit = investment * (minYearlyReturnRate / 100);
-    const max12MonthProfit = investment * (maxYearlyReturnRate / 100);
-    const min12MonthTotal = investment + min12MonthProfit;
-    const max12MonthTotal = investment + max12MonthProfit;
-
-    // Display results as ranges with proper formatting
-    document.getElementById("yearlyReturnRateRange").textContent = minYearlyReturnRate.toFixed(2) + "% - " + maxYearlyReturnRate.toFixed(2) + "%";
-
-    document.getElementById("totalProfitRange").textContent = formatBDCurrency(minTotalProfit) + " - " + formatBDCurrency(maxTotalProfit);
-
-    document.getElementById("finalValueRange").textContent = formatBDCurrency(minFinalValue) + " - " + formatBDCurrency(maxFinalValue);
-
-    document.getElementById("twelveMonthRange").textContent = formatBDCurrency(min12MonthProfit) + " - " + formatBDCurrency(max12MonthProfit);
-
-    document.getElementById("twelveMonthTotalRange").textContent = formatBDCurrency(min12MonthTotal) + " - " + formatBDCurrency(max12MonthTotal);
-
-    // Check if we're editing an existing calculation
-    const editingIndex = localStorage.getItem("editingIndex");
-    if (editingIndex !== null) {
-      // Get existing calculations
-      const savedCalculations = JSON.parse(localStorage.getItem("savedCalculations") || "[]");
-
-      // Preserve favorite status
-      const favorite = savedCalculations[editingIndex].favorite || false;
-
-      // Update the calculation at the specified index
-      savedCalculations[editingIndex] = {
-        merchant,
-        project,
-        inputs: {
-          minEarning,
-          maxEarning,
-          duration,
-          investment,
-        },
-        results: {
-          minYearlyReturnRate,
-          maxYearlyReturnRate,
-          minTotalProfit,
-          maxTotalProfit,
-          minFinalValue,
-          maxFinalValue,
-          min12MonthProfit,
-          max12MonthProfit,
-          min12MonthTotal,
-          max12MonthTotal,
-        },
-        favorite, // Preserve favorite status
-        timestamp: new Date().toISOString(),
-      };
-
-      // Save back to localStorage
-      localStorage.setItem("savedCalculations", JSON.stringify(savedCalculations));
-
-      // Clear editing state
-      localStorage.removeItem("editingIndex");
-
-      // Reset calculate button text
-      const calculateButton = document.getElementById("calculate");
-      calculateButton.innerHTML = '<i class="bi bi-calculator me-2"></i>Calculate Profit';
-    } else {
-      // Save as new calculation
-      try {
-        const calculationData = {
-          merchant,
-          project,
-          inputs: {
-            minEarning,
-            maxEarning,
-            duration,
-            investment,
-          },
-          results: {
-            minYearlyReturnRate,
-            maxYearlyReturnRate,
-            minTotalProfit,
-            maxTotalProfit,
-            minFinalValue,
-            maxFinalValue,
-            min12MonthProfit,
-            max12MonthProfit,
-            min12MonthTotal,
-            max12MonthTotal,
-          },
-          favorite: false, // Initialize favorite status for new calculations
-          timestamp: new Date().toISOString(),
-        };
-
-        // Save current calculation
-        localStorage.setItem("currentCalculation", JSON.stringify(calculationData));
-      } catch (e) {
-        console.log("Error saving to localStorage:", e);
-      }
-    }
-
-    // Show results section
-    document.getElementById("results").style.display = "block";
-
-    // Refresh the saved calculations display
-    displaySavedCalculations();
+  // Function to get selected rate type
+  function getSelectedRateType() {
+    const selectedRadio = document.querySelector('input[name="rateType"]:checked');
+    return selectedRadio?.value || "project"; // default to project if none selected
   }
 
-  // Add event listener for save calculation button
-  document.getElementById("saveCalculation").addEventListener("click", saveCurrentCalculation);
+  // Function to get current profit rates
+  function getProfitRates() {
+    try {
+      const rateType = getSelectedRateType();
+      const duration = parseFloat(document.getElementById("duration")?.value) || 0;
 
-  // Modify reset button to also clear editing state
-  document.getElementById("resetCalculator").addEventListener("click", function () {
-    // Clear all input fields
-    document.getElementById("merchant").value = "biniyog.io";
-    document.getElementById("project").value = "";
-    document.getElementById("minEarning").value = "";
-    document.getElementById("maxEarning").value = "";
-    document.getElementById("duration").value = "";
-    document.getElementById("investment").value = "";
+      let projectMin = 0,
+        projectMax = 0;
 
-    // Hide results section
-    document.getElementById("results").style.display = "none";
+      if (rateType === "project") {
+        projectMin = parseFloat(document.getElementById("minProjectRate")?.value) || 0;
+        projectMax = parseFloat(document.getElementById("maxProjectRate")?.value) || 0;
+      } else {
+        // Convert annual rate to project rate
+        const annualMin = parseFloat(document.getElementById("minAnnualRate")?.value) || 0;
+        const annualMax = parseFloat(document.getElementById("maxAnnualRate")?.value) || 0;
+        projectMin = (annualMin * duration) / 12;
+        projectMax = (annualMax * duration) / 12;
+      }
 
-    // Clear editing state
-    localStorage.removeItem("editingIndex");
+      if (duration === 0) return null;
 
-    // Reset calculate button text
-    const calculateButton = document.getElementById("calculate");
-    calculateButton.innerHTML = '<i class="bi bi-calculator me-2"></i>Calculate Profit';
+      return {
+        projectMin,
+        projectMax,
+        annualMin: (projectMin * 12) / duration,
+        annualMax: (projectMax * 12) / duration,
+      };
+    } catch (error) {
+      console.error("Error getting profit rates:", error);
+      return null;
+    }
+  }
 
-    // Focus on first input field
-    document.getElementById("project").focus();
-  });
+  // Function to show appropriate input fields based on rate type selection
+  function updateRateInputs() {
+    const rateType = getSelectedRateType();
+    const projectRateInput = document.getElementById("projectRateInput");
+    const annualRateInput = document.getElementById("annualRateInput");
 
-  // Display saved calculations on page load
-  displaySavedCalculations();
+    if (rateType === "project") {
+      if (projectRateInput) projectRateInput.style.display = "flex";
+      if (annualRateInput) annualRateInput.style.display = "none";
+      // Clear annual rate inputs
+      const minAnnualRate = document.getElementById("minAnnualRate");
+      const maxAnnualRate = document.getElementById("maxAnnualRate");
+      if (minAnnualRate) minAnnualRate.value = "";
+      if (maxAnnualRate) maxAnnualRate.value = "";
+    } else {
+      if (projectRateInput) projectRateInput.style.display = "none";
+      if (annualRateInput) annualRateInput.style.display = "flex";
+      // Clear project rate inputs
+      const minProjectRate = document.getElementById("minProjectRate");
+      const maxProjectRate = document.getElementById("maxProjectRate");
+      if (minProjectRate) minProjectRate.value = "";
+      if (maxProjectRate) maxProjectRate.value = "";
+    }
+  }
 });
