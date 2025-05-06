@@ -282,13 +282,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
           // Create header content with a better layout
           const headerContent = document.createElement("div");
-          headerContent.className = "d-flex justify-content-between align-items-center w-100";
+          headerContent.className = "d-flex justify-content-between align-items-center w-100 flex-wrap";
 
           // Create left section with merchant and project info
           const leftSection = document.createElement("div");
-          leftSection.className = "d-flex align-items-center";
+          leftSection.className = "d-flex align-items-center project-info";
           leftSection.innerHTML = `
-            <div class="project-info">
+            <div>
               <div class="merchant-name"><i class="bi bi-shop me-2"></i>${calc.merchant || "Unknown Merchant"}</div>
               <div class="project-name text-muted">${calc.project || "Unnamed Project"}</div>
             </div>
@@ -296,11 +296,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
           // Create middle section with duration and return rate
           const middleSection = document.createElement("div");
-          middleSection.className = "text-center mx-4";
+          middleSection.className = "text-center mx-4 middleSection";
           middleSection.innerHTML = `
             <div class="duration"><i class="bi bi-calendar-month me-1"></i>${calc.inputs.duration || 0} months</div>
             <div class="return-rate text-success">${(calc.results.minYearlyReturnRate || 0).toFixed(2)}% - ${(calc.results.maxYearlyReturnRate || 0).toFixed(2)}% yearly</div>
           `;
+
+          // Create investment amount badge (right side)
+          const investmentAmount = document.createElement("span");
+          investmentAmount.className = "investment-amount-badge";
+          investmentAmount.textContent = formatBDCurrency(calc.inputs.investment || 0);
 
           // Create button group for actions
           const buttonGroup = document.createElement("div");
@@ -337,8 +342,10 @@ document.addEventListener("DOMContentLoaded", function () {
           buttonGroup.appendChild(editButton);
           buttonGroup.appendChild(deleteButton);
 
+          // Compose header
           headerContent.appendChild(leftSection);
           headerContent.appendChild(middleSection);
+          headerContent.appendChild(investmentAmount);
           headerContent.appendChild(buttonGroup);
 
           // Create the accordion header and body
@@ -410,11 +417,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     <span><i class="bi bi-bank me-2"></i>Total Return:</span>
                     <span class="fw-bold">${formatBDCurrency(calc.results.minFinalValue || 0)} - ${formatBDCurrency(calc.results.maxFinalValue || 0)}</span>
                   </li>
-                  <li class="list-group-item d-flex justify-content-between">
+                  <li class="list-group-item d-flex justify-content-between projection-highlight">
                     <span><i class="bi bi-cash me-2"></i>12-Month Projection:</span>
                     <span class="fw-bold">${formatBDCurrency(calc.results.min12MonthProfit || 0)} - ${formatBDCurrency(calc.results.max12MonthProfit || 0)}</span>
                   </li>
-                  <li class="list-group-item d-flex justify-content-between">
+                  <li class="list-group-item d-flex justify-content-between projection-highlight">
                     <span><i class="bi bi-wallet2 me-2"></i>12-Month Total Return:</span>
                     <span class="fw-bold">${formatBDCurrency(calc.results.min12MonthTotal || 0)} - ${formatBDCurrency(calc.results.max12MonthTotal || 0)}</span>
                   </li>

@@ -1,6 +1,6 @@
 @media (max-width: 768px) {
   body {
-    padding: 15px;
+    padding: 15px 0px !important;
   }
   .results-grid {
     grid-template-columns: 1fr;
@@ -58,6 +58,16 @@
   }
   .row.g-3 {
     margin: 0 -0.5rem;
+  }
+  #calculatorForm .merchant-project-section,
+  #calculatorForm .form-group.mb-4 {
+    margin-bottom: 1.5rem !important;
+  }
+  #calculatorForm .form-group {
+    margin-top: 0 !important;
+  }
+  #calculatorForm .form-group .btn-group.w-100 {
+    margin-bottom: 0 !important;
   }
 }
 
@@ -300,34 +310,26 @@ button {
   padding-bottom: 15px;
 }
 
-.saved-calculations h2:after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background: linear-gradient(to right, #006747, #00a86b);
-  border-radius: 2px;
-}
-
 .accordion-item {
-  margin-bottom: 1rem;
-  border: 1px solid rgba(0, 0, 0, 0.125);
+  border: 1px solid #b0bfc7 !important;
   border-radius: 0.5rem;
   overflow: hidden;
   transition: all 0.3s ease;
   background-color: #fff;
+}
+.accordion-item:not(:last-child) {
+  margin-bottom: 1rem;
 }
 
 .accordion-item:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.favorite-item {
-  border: 2px solid #ffc107;
-  background-color: #fff8e1;
+.favorite-item,
+.favorite-item .accordion-header,
+.favorite-item .accordion-button,
+.favorite-item .accordion-body {
+  background-color: #fffbe6 !important;
 }
 
 .accordion-button {
@@ -614,7 +616,7 @@ button {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0rem;
 }
 
 /* Radio Button Container */
@@ -717,4 +719,139 @@ button {
 .card-title {
   font-size: 0.95rem;
   margin-bottom: 0.75rem;
+}
+
+/* 1. Responsive .btn-group .btn for mobile */
+@media (max-width: 576px) {
+  .btn-group .btn {
+    height: auto !important;
+    white-space: normal;
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+}
+
+/* 2. Consistent form-group spacing on mobile */
+@media (max-width: 576px) {
+  .form-group {
+    margin-bottom: 0 !important;
+  }
+  .form-group + .form-group {
+    margin-top: 1rem;
+  }
+}
+
+/* 3. Saved Calculations Accordion/Card Mobile Layout */
+@media (max-width: 576px) {
+  .accordion-button .project-info,
+  .accordion-button .middleSection {
+    min-width: 100%;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    justify-content: center;
+  }
+  .accordion-button .middleSection {
+    margin: 0.5rem 0 !important;
+  }
+  .accordion-button .btn-group {
+    width: 100%;
+    justify-content: flex-start;
+    margin-top: 0.5rem;
+    gap: 0.5rem;
+  }
+  .accordion-button {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.5rem;
+  }
+  .investment-amount-badge {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #006747;
+    background: #e6f4ea;
+    border-radius: 6px;
+    padding: 0.25rem 0.75rem;
+    width: fit-content;
+  }
+}
+
+/* 4. Projection Highlight Color */
+.projection-highlight {
+  color: #6c3ad6 !important;
+  font-weight: 700;
+}
+
+/* 5. Investment Amount in Accordion Header */
+.investment-amount-badge {
+  display: inline-block;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #006747;
+  background: #e6f4ea;
+  border-radius: 6px;
+  padding: 0.25rem 0.75rem;
+  margin-left: 1rem;
+}
+
+/* Remove double borders between stacked items */
+.accordion-item + .accordion-item {
+  border-top: 1px solid #b0bfc7 !important;
+}
+
+/* Mobile: Center align accordion title and adjust font sizes */
+@media (max-width: 576px) {
+  #savedCalculationsList .accordion-item {
+    margin-bottom: 20px;
+  }
+  .accordion-button {
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 0.98rem !important;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  .accordion-header {
+    text-align: center !important;
+  }
+  .accordion-button .merchant-name,
+  .accordion-button .project-name,
+  .accordion-button .duration,
+  .accordion-button .return-rate,
+  .accordion-button .investment-amount-badge {
+    text-align: center !important;
+    width: 100%;
+    display: block;
+    margin: 0 auto 0.25rem auto;
+  }
+  .accordion-body {
+    font-size: 0.93rem !important;
+    padding: 0.75rem 0.5rem !important;
+  }
+  .accordion-body .list-group-item {
+    font-size: 0.75rem !important;
+    padding: 0.5rem 0.25rem !important;
+  }
+  #savedCalculationsList .accordion-button::after {
+    margin-right: auto;
+    margin-top: 10px;
+  }
+  .saved-calculations h2 {
+    padding-bottom: 0;
+  }
+  .calculator {
+    padding: 1rem 0.5rem !important;
+  }
+}
+
+/* Desktop: Slightly larger font for accordion title */
+@media (min-width: 577px) {
+  .accordion-button {
+    font-size: 1.15rem;
+  }
+  .accordion-body {
+    font-size: 1.05rem;
+  }
 }
