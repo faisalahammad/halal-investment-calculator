@@ -839,20 +839,4 @@ document.addEventListener("DOMContentLoaded", function () {
       if (maxProjectRate) maxProjectRate.value = "";
     }
   }
-
-  // Live Bangladeshi number formatting for Investment Amount input
-  const investmentInput = document.getElementById("investment");
-  if (investmentInput) {
-    investmentInput.addEventListener("input", function (e) {
-      // Remove all non-digit characters
-      let rawValue = e.target.value.replace(/[^0-9]/g, "");
-      if (!rawValue) {
-        e.target.value = "";
-        return;
-      }
-      // Format using Indian/Bangladeshi system
-      let formatted = Number(rawValue).toLocaleString("en-IN");
-      e.target.value = formatted;
-    });
-  }
 });
