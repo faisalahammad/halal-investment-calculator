@@ -1,0 +1,52 @@
+.invcalc_input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+  touch-action: none;
+}
+
+.invcalc_input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.invcalc_highlight_number {
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1;
+  display: inline;
+}
+
+.invcalc_percent {
+  font-size: 2rem;
+  opacity: 0.9;
+  display: none;
+}
+
+.invcalc_highlight_subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.invcalc_milestone {
+  border-left: 3px solid #38bdf8;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 0 8px 8px 0;
+}
+
+.invcalc_note {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0.5rem 0 0 0;
+}
+
+.invcalc_hidden {
+  display: none !important;
+}

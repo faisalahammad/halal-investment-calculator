@@ -1,904 +1,181 @@
-<div class="investment-calculator">
-  <h1 class="invcalc_title">Investment Calculator</h1>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Investment Calculator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Custom CSS -->
+    <link href="assets/css/calculator.css" rel="stylesheet" />
+  </head>
+  <body class="bg-light">
+    <div class="container py-5">
+      <div class="investment-calculator bg-white rounded shadow-sm p-4">
+        <h1 class="text-center mb-4 text-primary">Investment Calculator</h1>
 
-  <div class="invcalc_grid">
-    <div class="invcalc_left_panel">
-      <div class="invcalc_section">
-        <label class="invcalc_label">Select Calculation Mode:</label>
-        <div class="invcalc_radio_group">
-          <label class="invcalc_radio_label">
-            <input type="radio" name="invcalc_mode" value="projection" checked onclick="invcalc_toggleMode()" />
-            <span>Project Investment</span>
-          </label>
-          <label class="invcalc_radio_label">
-            <input type="radio" name="invcalc_mode" value="goal" onclick="invcalc_toggleMode()" />
-            <span>Reach a Goal</span>
-          </label>
+        <div class="row g-4">
+          <div class="col-lg-4">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <div class="mb-4">
+                  <label class="form-label fw-bold">Select Calculation Mode:</label>
+                  <div class="d-flex gap-4">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="invcalc_mode" id="mode_projection" value="projection" checked onclick="invcalc_toggleMode()" />
+                      <label class="form-check-label" for="mode_projection">Project Investment</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="invcalc_mode" id="mode_goal" value="goal" onclick="invcalc_toggleMode()" />
+                      <label class="form-check-label" for="mode_goal">Reach a Goal</label>
+                    </div>
+                  </div>
+                </div>
+
+                <form id="invcalc_form" class="needs-validation" novalidate onsubmit="event.preventDefault(); invcalc_calculate();">
+                  <div id="invcalc_error" class="alert alert-danger invcalc_hidden"></div>
+
+                  <div id="invcalc_projection_inputs" class="row g-3">
+                    <div class="col-12">
+                      <label for="invcalc_monthly_investment" class="form-label">Monthly Investment:</label>
+                      <input type="text" id="invcalc_monthly_investment" class="form-control invcalc_input" placeholder="e.g., 1,00,000" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
+                    </div>
+                    <div class="col-12">
+                      <label for="invcalc_yearly_increase" class="form-label">Yearly Increase %:</label>
+                      <input type="text" id="invcalc_yearly_increase" class="form-control invcalc_input" placeholder="e.g., 5%" value="0" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
+                    </div>
+                    <div class="col-12">
+                      <label for="invcalc_initial_profit" class="form-label">Initial Profit % (Year 1):</label>
+                      <input type="text" id="invcalc_initial_profit" class="form-control invcalc_input" placeholder="e.g., 18" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
+                    </div>
+                    <div class="col-12">
+                      <label for="invcalc_profit_increase" class="form-label">Annual Profit Increase:</label>
+                      <input type="text" id="invcalc_profit_increase" class="form-control invcalc_input" placeholder="e.g., 2%" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
+                    </div>
+                  </div>
+
+                  <div id="invcalc_goal_inputs" class="row g-3 invcalc_hidden">
+                    <div class="col-12">
+                      <label for="invcalc_target_amount" class="form-label">Target Amount:</label>
+                      <input type="text" id="invcalc_target_amount" class="form-control invcalc_input" placeholder="e.g., 1,00,00,000" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
+                    </div>
+                    <div class="col-12">
+                      <label for="invcalc_goal_yearly_increase" class="form-label">Yearly Increase %:</label>
+                      <input type="text" id="invcalc_goal_yearly_increase" class="form-control invcalc_input" placeholder="e.g., 5%" value="0" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
+                    </div>
+                    <div class="col-12">
+                      <label for="invcalc_goal_initial_profit" class="form-label">Initial Profit %:</label>
+                      <input type="text" id="invcalc_goal_initial_profit" class="form-control invcalc_input" placeholder="e.g., 18" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
+                    </div>
+                    <div class="col-12">
+                      <label for="invcalc_goal_profit_increase" class="form-label">Annual Profit Increase:</label>
+                      <input type="text" id="invcalc_goal_profit_increase" class="form-control invcalc_input" placeholder="e.g., 2%" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="invcalc_years" class="form-label">Investment Duration (Years):</label>
+                    <input type="text" id="invcalc_years" class="form-control invcalc_input" placeholder="e.g., 10" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
+                  </div>
+
+                  <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="invcalc_reinvest_profits" checked />
+                    <label class="form-check-label" for="invcalc_reinvest_profits">Reinvest Profits</label>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary w-100">Calculate</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div id="invcalc_results" class="col-lg-8 invcalc_hidden">
+            <div class="card border-0 shadow-sm">
+              <div class="card-body">
+                <h2 class="h4 mb-4">Results</h2>
+
+                <div class="row g-4 mb-4">
+                  <div class="col-md-6">
+                    <div class="card h-100 border-0 bg-light">
+                      <div class="card-body">
+                        <h3 class="h6 text-muted mb-2">Total Invested</h3>
+                        <p class="h4 mb-0"><span id="invcalc_total_invested"></span> BDT</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card h-100 border-0 bg-light">
+                      <div class="card-body">
+                        <h3 class="h6 text-muted mb-2">Final Amount</h3>
+                        <p class="h4 mb-0"><span id="invcalc_final_amount"></span> BDT</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card h-100 border-0 bg-light">
+                      <div class="card-body">
+                        <h3 class="h6 text-muted mb-2">Total Profit</h3>
+                        <p class="h4 mb-0"><span id="invcalc_total_profit"></span> BDT</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card h-100 border-0 bg-primary text-white">
+                      <div class="card-body text-center">
+                        <span class="invcalc_highlight_number" id="invcalc_total_growth_percent"></span>
+                        <span class="invcalc_percent">%</span>
+                        <p class="invcalc_highlight_subtitle mb-0">Total Asset Growth Rate</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="invcalc_goal_investment" class="invcalc_hidden mb-4">
+                  <div class="card border-0 bg-light">
+                    <div class="card-body">
+                      <h3 class="h6 text-muted mb-2">Required Initial Monthly Investment</h3>
+                      <p class="h4 mb-2"><span id="invcalc_required_monthly"></span> BDT</p>
+                      <p class="invcalc_note mb-0">Note: This calculation assumes a constant monthly investment to reach the goal, without yearly increases.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card border-0 bg-light mb-4">
+                  <div class="card-body">
+                    <h3 class="h5 mb-3">Investment Breakdown</h3>
+                    <div id="invcalc_breakdown_text"></div>
+                  </div>
+                </div>
+
+                <div class="card border-0">
+                  <div class="card-body">
+                    <h3 class="h5 mb-3">Yearly Summary</h3>
+                    <div class="table-responsive">
+                      <table class="table table-striped">
+                        <thead class="table-dark">
+                          <tr>
+                            <th style="width: 15%"># Year<br />Profit %</th>
+                            <th style="width: 20%">New Inv.<br />Total Inv.</th>
+                            <th style="width: 25%">Total Value</th>
+                            <th style="width: 25%">New Profit<br />Total Profit</th>
+                            <th style="width: 15%">Growth Rate</th>
+                          </tr>
+                        </thead>
+                        <tbody id="invcalc_summary_table"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <form id="invcalc_form" class="invcalc_section" onsubmit="event.preventDefault(); invcalc_calculate();">
-        <div id="invcalc_error" class="invcalc_error invcalc_hidden"></div>
-        <div id="invcalc_projection_inputs" class="invcalc_input_grid">
-          <div class="invcalc_input_group">
-            <label for="invcalc_monthly_investment" class="invcalc_label">Monthly Investment:</label>
-            <input type="text" id="invcalc_monthly_investment" class="invcalc_input" placeholder="e.g., 1,00,000" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
-          </div>
-          <div class="invcalc_input_group">
-            <label for="invcalc_yearly_increase" class="invcalc_label">Yearly Increase %:</label>
-            <input type="text" id="invcalc_yearly_increase" class="invcalc_input" placeholder="e.g., 5%" value="0" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
-          </div>
-          <div class="invcalc_input_group">
-            <label for="invcalc_initial_profit" class="invcalc_label">Initial Profit % (Year 1):</label>
-            <input type="text" id="invcalc_initial_profit" class="invcalc_input" placeholder="e.g., 18" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
-          </div>
-          <div class="invcalc_input_group">
-            <label for="invcalc_profit_increase" class="invcalc_label">Annual Profit Increase:</label>
-            <input type="text" id="invcalc_profit_increase" class="invcalc_input" placeholder="e.g., 2%" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
-          </div>
-        </div>
-        <div id="invcalc_goal_inputs" class="invcalc_hidden invcalc_input_grid">
-          <div class="invcalc_input_group">
-            <label for="invcalc_target_amount" class="invcalc_label">Target Amount:</label>
-            <input type="text" id="invcalc_target_amount" class="invcalc_input" placeholder="e.g., 1,00,00,000" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
-          </div>
-          <div class="invcalc_input_group">
-            <label for="invcalc_goal_yearly_increase" class="invcalc_label">Yearly Increase %:</label>
-            <input type="text" id="invcalc_goal_yearly_increase" class="invcalc_input" placeholder="e.g., 5%" value="0" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
-          </div>
-          <div class="invcalc_input_group">
-            <label for="invcalc_goal_initial_profit" class="invcalc_label">Initial Profit %:</label>
-            <input type="text" id="invcalc_goal_initial_profit" class="invcalc_input" placeholder="e.g., 18" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
-          </div>
-          <div class="invcalc_input_group">
-            <label for="invcalc_goal_profit_increase" class="invcalc_label">Annual Profit Increase:</label>
-            <input type="text" id="invcalc_goal_profit_increase" class="invcalc_input" placeholder="e.g., 2%" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
-          </div>
-        </div>
-        <div class="invcalc_input_group">
-          <label for="invcalc_years" class="invcalc_label">Investment Duration (Years):</label>
-          <input type="text" id="invcalc_years" class="invcalc_input" placeholder="e.g., 10" oninput="invcalc_formatInputAsBangladeshiNumber(this)" />
-        </div>
-        <div class="invcalc_input_group">
-          <label for="invcalc_reinvest_profits" class="invcalc_label">
-            Reinvest Profits:
-            <input type="checkbox" id="invcalc_reinvest_profits" checked />
-          </label>
-        </div>
-        <button type="submit" class="invcalc_button">Calculate</button>
-      </form>
     </div>
 
-    <div id="invcalc_results" class="invcalc_results invcalc_hidden invcalc_right_panel">
-      <h2 class="invcalc_results_title">Results</h2>
-
-      <div class="invcalc_results_grid">
-        <div class="invcalc_result_card">
-          <div class="invcalc_card_content">
-            <h3>Total Invested</h3>
-            <p class="invcalc_amount"><span id="invcalc_total_invested"></span> BDT</p>
-          </div>
-        </div>
-
-        <div class="invcalc_result_card">
-          <div class="invcalc_card_content">
-            <h3>Final Amount</h3>
-            <p class="invcalc_amount"><span id="invcalc_final_amount"></span> BDT</p>
-          </div>
-        </div>
-
-        <div class="invcalc_result_card">
-          <div class="invcalc_card_content">
-            <h3>Total Profit</h3>
-            <p class="invcalc_amount"><span id="invcalc_total_profit"></span> BDT</p>
-          </div>
-        </div>
-
-        <div class="invcalc_result_card invcalc_highlight_card">
-          <div class="invcalc_card_content">
-            <span class="invcalc_highlight_number" id="invcalc_total_growth_percent"></span>
-            <span class="invcalc_percent">%</span>
-            <p class="invcalc_highlight_subtitle">Total Asset Growth Rate</p>
-          </div>
-        </div>
-      </div>
-
-      <div id="invcalc_goal_investment" class="invcalc_hidden invcalc_goal_section">
-        <div class="invcalc_result_card invcalc_full_width">
-          <div class="invcalc_card_content">
-            <h3>Required Initial Monthly Investment</h3>
-            <p class="invcalc_amount"><span id="invcalc_required_monthly"></span> BDT</p>
-            <p class="invcalc_note">Note: This calculation assumes a constant monthly investment to reach the goal, without yearly increases.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="invcalc_breakdown invcalc_section">
-        <h3 class="invcalc_breakdown_title">Investment Breakdown</h3>
-        <div id="invcalc_breakdown_text"></div>
-      </div>
-
-      <div class="invcalc_table_container">
-        <h3 class="invcalc_results_title">Yearly Summary</h3>
-        <div class="invcalc_table_wrapper">
-          <table class="invcalc_table">
-            <thead>
-              <tr>
-                <th style="width: 15%">
-                  # Year<br />
-                  Profit %
-                </th>
-                <th style="width: 20%">
-                  New Inv.<br />
-                  Total Inv.
-                </th>
-                <th style="width: 25%">Total Value</th>
-                <th style="width: 25%">
-                  New Profit<br />
-                  Total Profit
-                </th>
-                <th style="width: 15%">Growth Rate</th>
-              </tr>
-            </thead>
-            <tbody id="invcalc_summary_table"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<style>
-  .investment-calculator {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .invcalc_grid {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-  }
-
-  .invcalc_left_panel {
-    flex: 0 0 400px;
-  }
-
-  .invcalc_right_panel {
-    flex: 1;
-  }
-
-  .invcalc_input_grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
-  }
-
-  .invcalc_input_group {
-    margin-bottom: 1rem;
-  }
-
-  .invcalc_title {
-    font-size: 28px;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 30px;
-    color: #1a365d;
-  }
-  .invcalc_section {
-    margin-bottom: 25px;
-  }
-  .invcalc_label {
-    display: block;
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 10px;
-    color: #333;
-  }
-  .invcalc_radio_group {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 20px;
-  }
-  .invcalc_radio_label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  .invcalc_radio_label input[type="radio"] {
-    margin: 0;
-    cursor: pointer;
-  }
-  .invcalc_radio_label span {
-    user-select: none;
-  }
-  .invcalc_input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 16px;
-    box-sizing: border-box;
-    margin-bottom: 20px;
-    touch-action: none;
-  }
-  .invcalc_input:focus {
-    outline: none;
-    border-color: #2563eb;
-  }
-  .invcalc_button {
-    width: 100%;
-    padding: 14px;
-    background-color: #2563eb;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  .invcalc_button:hover {
-    background-color: #1d4ed8;
-  }
-  .invcalc_error {
-    color: #dc3545;
-    font-size: 14px;
-    margin-top: 10px;
-  }
-  .invcalc_results {
-    background-color: #ffffff;
-    border-radius: 12px;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-  }
-  #invcalc_results h2 {
-    margin-top: 0;
-  }
-  .invcalc_results_grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-    margin: 2rem 0;
-  }
-  .invcalc_result_card {
-    background: #f8fafc;
-    border-radius: 10px;
-    padding: 1.5rem;
-    transition: transform 0.2s;
-    border: 1px solid #e2e8f0;
-  }
-  .invcalc_result_card:hover {
-    transform: translateY(-2px);
-  }
-  .invcalc_highlight_card {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    color: white;
-    grid-column: 2;
-    text-align: center;
-    /* margin-top: 1.5rem; */
-  }
-  .invcalc_card_content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  .invcalc_card_content h3 {
-    font-size: 1.1rem;
-    color: #1a365d;
-    margin: 0;
-  }
-  .invcalc_amount {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #2563eb;
-    margin: 0.5rem 0;
-  }
-  .invcalc_highlight_number {
-    font-size: 2rem;
-    font-weight: bold;
-    line-height: 1;
-    display: inline;
-  }
-  .invcalc_percent {
-    font-size: 2rem;
-    opacity: 0.9;
-    display: none;
-  }
-  .invcalc_highlight_subtitle {
-    font-size: 1rem;
-    opacity: 0.9;
-    margin: 0;
-  }
-  .invcalc_table_container {
-    margin-top: 2rem;
-  }
-  .invcalc_table_wrapper {
-    overflow-x: auto;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-  }
-  .invcalc_table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 600px;
-    margin-top: 0;
-  }
-  .invcalc_table th,
-  .invcalc_table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #e2e8f0;
-    line-height: 1.5;
-  }
-  .invcalc_table th {
-    background-color: #f1f5f9;
-    font-weight: 600;
-    color: #1a365d;
-    line-height: 1.5;
-  }
-  .invcalc_table tr:hover {
-    background-color: #f8fafc;
-  }
-  .invcalc_breakdown {
-    background-color: #f0f9ff;
-    border-radius: 10px;
-    padding: 1.5rem;
-    margin: 2rem 0;
-    border: 1px solid #bae6fd;
-  }
-  .invcalc_breakdown_title {
-    color: #0369a1;
-    font-size: 1.25rem;
-    margin: 0 0 1rem 0;
-  }
-  .invcalc_milestone {
-    border-left: 3px solid #38bdf8;
-    padding: 1rem;
-    margin: 1rem 0;
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 0 8px 8px 0;
-  }
-  .invcalc_note {
-    font-size: 0.875rem;
-    color: #64748b;
-    margin: 0.5rem 0 0 0;
-  }
-  .invcalc_full_width {
-    grid-column: 1 / -1;
-  }
-  .invcalc_hidden {
-    display: none !important;
-  }
-  @media (max-width: 992px) {
-    .invcalc_grid {
-      flex-direction: column;
-    }
-
-    .invcalc_left_panel {
-      flex: none;
-      width: 100%;
-    }
-
-    .invcalc_right_panel {
-      width: 100%;
-    }
-  }
-</style>
-<script>
-  function invcalc_toggleMode() {
-    const mode = document.querySelector('input[name="invcalc_mode"]:checked').value;
-    const projectionInputs = document.getElementById("invcalc_projection_inputs");
-    const goalInputs = document.getElementById("invcalc_goal_inputs");
-    const results = document.getElementById("invcalc_results");
-    const error = document.getElementById("invcalc_error");
-    const goalInvestment = document.getElementById("invcalc_goal_investment");
-    const form = document.getElementById("invcalc_form");
-
-    if (!projectionInputs || !goalInputs || !results || !error || !form || !goalInvestment) {
-      console.error("Required elements not found in the DOM");
-      return;
-    }
-
-    if (mode === "projection") {
-      projectionInputs.classList.remove("invcalc_hidden");
-      goalInputs.classList.add("invcalc_hidden");
-      goalInvestment.classList.add("invcalc_hidden");
-    } else {
-      projectionInputs.classList.add("invcalc_hidden");
-      goalInputs.classList.remove("invcalc_hidden");
-      goalInvestment.classList.remove("invcalc_hidden");
-    }
-
-    results.classList.add("invcalc_hidden");
-    error.classList.add("invcalc_hidden");
-    form.reset();
-  }
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const projectionInputs = document.getElementById("invcalc_projection_inputs");
-    const goalInputs = document.getElementById("invcalc_goal_inputs");
-    const results = document.getElementById("invcalc_results");
-    const error = document.getElementById("invcalc_error");
-    const form = document.getElementById("invcalc_form");
-
-    if (!projectionInputs || !goalInputs || !results || !error || !form) {
-      console.error("Required elements not found in the DOM");
-      return;
-    }
-
-    const modeRadios = document.querySelectorAll('input[name="invcalc_mode"]');
-    modeRadios.forEach((radio) => {
-      radio.addEventListener("change", invcalc_toggleMode);
-    });
-
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      invcalc_calculate();
-    });
-
-    invcalc_toggleMode();
-
-    const inputs = document.querySelectorAll(".invcalc_input");
-    inputs.forEach((input) => {
-      input.addEventListener(
-        "touchstart",
-        function (e) {
-          // Handle touch events if needed
-        },
-        { passive: true }
-      );
-    });
-  });
-
-  function invcalc_formatBangladeshiNumber(number) {
-    if (isNaN(number) || number === null || number === undefined) {
-      return "0";
-    }
-    const numStr = number.toString();
-    const [integerPart, decimalPart] = numStr.split(".");
-    let formattedInteger = integerPart.replace(/\D/g, "");
-    if (!formattedInteger) return decimalPart ? "0." + decimalPart : "0";
-    const len = formattedInteger.length;
-    if (len <= 3) {
-      formattedInteger = formattedInteger;
-    } else if (len <= 5) {
-      formattedInteger = formattedInteger.slice(0, len - 3) + "," + formattedInteger.slice(len - 3);
-    } else {
-      let result = formattedInteger.slice(len - 3);
-      let remaining = formattedInteger.slice(0, len - 3);
-      while (remaining.length > 0) {
-        if (remaining.length <= 2) {
-          result = remaining + "," + result;
-          break;
-        } else {
-          result = remaining.slice(remaining.length - 2) + "," + result;
-          remaining = remaining.slice(0, remaining.length - 2);
-        }
-      }
-      formattedInteger = result;
-    }
-    return decimalPart ? formattedInteger + "." + decimalPart : formattedInteger;
-  }
-
-  function invcalc_formatInputAsBangladeshiNumber(input) {
-    const cursorPosition = input.selectionStart;
-    const originalValue = input.value;
-    const originalLength = originalValue.length;
-    let value = originalValue.replace(/[^0-9.-]/g, "");
-    if (value.startsWith("-")) {
-      value = "-" + value.substring(1).replace(/-/g, "");
-    } else {
-      value = value.replace(/-/g, "");
-    }
-    const parts = value.split(".");
-    value = parts[0] + (parts.length > 1 ? "." + parts.slice(1).join("") : "");
-    let sign = "";
-    let numberPart = value;
-    if (value.startsWith("-")) {
-      sign = "-";
-      numberPart = value.substring(1);
-    }
-    const numParts = numberPart.split(".");
-    let integerPart = numParts[0];
-    const decimalPart = numParts.length > 1 ? "." + numParts[1] : "";
-    const formattedInteger = invcalc_formatBangladeshiNumber(integerPart);
-    const formattedValue = sign + formattedInteger + decimalPart;
-    input.value = formattedValue;
-    const newLength = formattedValue.length;
-    let newCursorPosition = cursorPosition + (newLength - originalLength);
-    const commasBeforeCursorOriginal = (originalValue.substring(0, cursorPosition).match(/,/g) || []).length;
-    const commasBeforeCursorNew = (formattedValue.substring(0, newCursorPosition).match(/,/g) || []).length;
-    newCursorPosition += commasBeforeCursorNew - commasBeforeCursorOriginal;
-    newCursorPosition = Math.max(0, Math.min(newLength, newCursorPosition));
-    setTimeout(() => {
-      input.setSelectionRange(newCursorPosition, newCursorPosition);
-    }, 0);
-  }
-
-  function invcalc_sanitizeInput(input) {
-    return input.replace(/[^0-9.-]/g, "").replace(/(\..*?)\./g, "$1");
-  }
-
-  function invcalc_validateInputs(mode, inputs) {
-    const errors = [];
-    const years = parseInt(inputs.years);
-    const monthlyInvestment = parseFloat(inputs.monthlyInvestment);
-    const yearlyIncrease = parseFloat(inputs.yearlyIncrease);
-    const targetAmount = parseFloat(inputs.targetAmount);
-    const initialProfit = parseFloat(inputs.initialProfit);
-    const profitIncrease = parseFloat(inputs.profitIncrease);
-
-    if (isNaN(years)) {
-      errors.push("Years must be a valid number.");
-    } else if (years <= 0 || years > 100) {
-      errors.push("Years must be a positive number between 1 and 100.");
-    }
-
-    if (isNaN(initialProfit)) {
-      errors.push("Initial Profit % must be a valid number.");
-    } else if (initialProfit < -50 || initialProfit > 100) {
-      errors.push("Initial Profit % must be between -50 and 100.");
-    }
-
-    if (isNaN(profitIncrease)) {
-      errors.push("Profit Increase % must be a valid number.");
-    } else if (profitIncrease < -10 || profitIncrease > 10) {
-      errors.push("Profit Increase % must be between -10 and 10.");
-    }
-
-    if (mode === "projection") {
-      if (isNaN(monthlyInvestment)) {
-        errors.push("Initial Monthly Investment must be a valid number.");
-      } else if (monthlyInvestment <= 0) {
-        errors.push("Initial Monthly Investment must be a positive number.");
-      }
-    } else {
-      if (isNaN(targetAmount)) {
-        errors.push("Target Amount must be a valid number.");
-      } else if (targetAmount <= 0) {
-        errors.push("Target Amount must be a positive number.");
-      }
-    }
-
-    if (isNaN(yearlyIncrease)) {
-      errors.push("Yearly Investment Increase % must be a valid number.");
-    } else if (yearlyIncrease < -10 || yearlyIncrease > 50) {
-      errors.push("Yearly Investment Increase % must be between -10% and 50%.");
-    }
-
-    return errors;
-  }
-
-  class Investment {
-    constructor(amount, startMonth, startYear, rate) {
-      this.amount = amount;
-      this.startMonth = startMonth;
-      this.startYear = startYear;
-      this.rate = rate;
-    }
-
-    getValueAt(month, year, withProfit = true) {
-      const monthsPassed = (year - this.startYear) * 12 + (month - this.startMonth);
-      if (monthsPassed < 0) return 0;
-
-      if (monthsPassed === 0) return this.amount;
-
-      let value = this.amount;
-      if (withProfit && monthsPassed >= 12) {
-        const fullYearsPassed = Math.floor(monthsPassed / 12);
-        value *= Math.pow(1 + this.rate, fullYearsPassed);
-      }
-
-      return value;
-    }
-  }
-
-  function invcalc_calcMonthlyBreakdown(initialMonthlyInvestment, years, initialRate, yearlyRateIncrease, yearlyInvestmentIncrease, reinvestProfits) {
-    const results = [];
-    let totalInvested = 0;
-    let totalReinvestedProfits = 0;
-    let currentMonthlyInvestment = initialMonthlyInvestment;
-
-    const startMonth = new Date().getMonth();
-
-    // First year (partial year from April)
-    const firstYearMonths = 12 - startMonth;
-    const firstYearInvestment = currentMonthlyInvestment * firstYearMonths;
-    totalInvested = firstYearInvestment;
-
-    results.push({
-      year: 1,
-      yearlyInvestment: firstYearInvestment,
-      totalInvested: totalInvested,
-      totalValue: totalInvested,
-      profit: 0,
-      yearlyProfit: 0,
-      growthRate: 0,
-    });
-
-    // Calculate subsequent years
-    let previousYearValue = totalInvested;
-    let previousYearProfit = 0;
-
-    for (let year = 1; year < years; year++) {
-      // Increase monthly investment by yearly rate
-      currentMonthlyInvestment *= 1 + yearlyInvestmentIncrease;
-
-      // Add new investment for the current year
-      const yearlyInvestment = currentMonthlyInvestment * 12;
-
-      // Calculate profit rate for this year
-      const currentRate = initialRate + (year - 1) * yearlyRateIncrease;
-
-      // Calculate profit on previous year's total value
-      const yearlyProfit = (previousYearValue * currentRate) / 100;
-
-      // If reinvesting profits, add previous year's profit to total invested
-      if (reinvestProfits) {
-        totalReinvestedProfits += previousYearProfit;
-        totalInvested = totalInvested + yearlyInvestment + previousYearProfit;
-      } else {
-        totalInvested += yearlyInvestment;
-      }
-
-      // Calculate total value including all investments and profits
-      const totalValue = totalInvested + yearlyProfit;
-
-      // Calculate growth rate based on original investment (excluding reinvested profits)
-      const originalInvestment = totalInvested - totalReinvestedProfits;
-      const growthRate = (totalValue / originalInvestment) * 100 - 100;
-
-      results.push({
-        year: year + 1,
-        yearlyInvestment: yearlyInvestment,
-        totalInvested: originalInvestment,
-        totalValue: totalValue,
-        profit: totalValue - originalInvestment,
-        yearlyProfit: yearlyProfit,
-        growthRate: growthRate,
-      });
-
-      previousYearValue = totalValue;
-      previousYearProfit = yearlyProfit;
-    }
-
-    // Calculate final total asset growth rate
-    const finalValue = results[results.length - 1].totalValue;
-    const originalInvestment = results[results.length - 1].totalInvested;
-    const totalAssetGrowthRate = (finalValue / originalInvestment) * 100 - 100;
-
-    return {
-      yearlySummary: results,
-      finalAmount: finalValue,
-      totalInvested: originalInvestment,
-      totalProfit: finalValue - originalInvestment,
-      totalAssetGrowthRate: totalAssetGrowthRate,
-    };
-  }
-
-  function invcalc_calculate() {
-    const mode = document.querySelector('input[name="invcalc_mode"]:checked').value;
-    const reinvestProfits = document.getElementById("invcalc_reinvest_profits").checked;
-    const errorDiv = document.getElementById("invcalc_error");
-    const resultsDiv = document.getElementById("invcalc_results");
-    const goalInvestmentDiv = document.getElementById("invcalc_goal_investment");
-
-    if (!errorDiv || !resultsDiv || !goalInvestmentDiv) {
-      console.error("Required elements not found in the DOM");
-      return;
-    }
-
-    const inputs = {
-      monthlyInvestment: invcalc_sanitizeInput(document.getElementById("invcalc_monthly_investment")?.value || "0"),
-      yearlyIncrease: invcalc_sanitizeInput(mode === "projection" ? document.getElementById("invcalc_yearly_increase").value : document.getElementById("invcalc_goal_yearly_increase").value),
-      years: invcalc_sanitizeInput(document.getElementById("invcalc_years").value),
-      targetAmount: invcalc_sanitizeInput(document.getElementById("invcalc_target_amount")?.value || "0"),
-      initialProfit: invcalc_sanitizeInput(mode === "projection" ? document.getElementById("invcalc_initial_profit").value : document.getElementById("invcalc_goal_initial_profit").value),
-      profitIncrease: invcalc_sanitizeInput(mode === "projection" ? document.getElementById("invcalc_profit_increase").value : document.getElementById("invcalc_goal_profit_increase").value),
-    };
-
-    const errors = invcalc_validateInputs(mode, inputs);
-
-    if (errors.length > 0) {
-      errorDiv.textContent = errors.join(" ");
-      errorDiv.classList.remove("invcalc_hidden");
-      resultsDiv.classList.add("invcalc_hidden");
-      return;
-    }
-
-    errorDiv.classList.add("invcalc_hidden");
-
-    const years = parseInt(inputs.years);
-    let initialMonthlyInvestment = mode === "projection" ? parseFloat(inputs.monthlyInvestment) : 0;
-    const yearlyIncreaseRate = parseFloat(inputs.yearlyIncrease) / 100 || 0;
-    const initialProfit = parseFloat(inputs.initialProfit);
-    const profitIncrease = parseFloat(inputs.profitIncrease);
-    const targetAmount = mode === "goal" ? parseFloat(inputs.targetAmount) : 0;
-
-    if (mode === "goal") {
-      let low = 1;
-      let high = targetAmount;
-      let requiredMonthly = 0;
-      let iterations = 0;
-      let bestResult = null;
-      const tolerance = targetAmount * 0.001; // 0.1% tolerance
-
-      while (iterations < 100) {
-        requiredMonthly = (low + high) / 2;
-
-        const result = invcalc_calcMonthlyBreakdown(requiredMonthly, years, initialProfit, profitIncrease, yearlyIncreaseRate, reinvestProfits);
-
-        const diff = result.finalAmount - targetAmount;
-
-        if (Math.abs(diff) < tolerance) {
-          bestResult = result;
-          break;
-        }
-
-        if (diff < 0) {
-          low = requiredMonthly;
-        } else {
-          high = requiredMonthly;
-        }
-
-        bestResult = result;
-        iterations++;
-
-        if (high - low < 1) break;
-      }
-
-      if (!bestResult) {
-        errorDiv.textContent = "Could not determine required investment. Try different parameters.";
-        errorDiv.classList.remove("invcalc_hidden");
-        resultsDiv.classList.add("invcalc_hidden");
-        return;
-      }
-
-      initialMonthlyInvestment = requiredMonthly;
-      var result = bestResult;
-    } else {
-      var result = invcalc_calcMonthlyBreakdown(initialMonthlyInvestment, years, initialProfit, profitIncrease, yearlyIncreaseRate, reinvestProfits);
-    }
-
-    const finalAmount = result.finalAmount;
-    const totalInvested = result.totalInvested;
-    const totalProfit = result.totalProfit;
-    const growthRate = totalInvested > 0 ? (finalAmount / totalInvested) * 100 - 100 : 0;
-    const yearlySummary = result.yearlySummary;
-
-    document.getElementById("invcalc_total_invested").textContent = invcalc_formatBangladeshiNumber(totalInvested.toFixed(0));
-    document.getElementById("invcalc_final_amount").textContent = invcalc_formatBangladeshiNumber(finalAmount.toFixed(0));
-    document.getElementById("invcalc_total_profit").textContent = invcalc_formatBangladeshiNumber(totalProfit.toFixed(0));
-    document.getElementById("invcalc_total_growth_percent").textContent = totalInvested > 0 ? growthRate.toFixed(2) + "%" : "N/A";
-
-    document.getElementById("invcalc_goal_investment").classList.toggle("invcalc_hidden", mode !== "goal");
-
-    if (mode === "goal") {
-      document.getElementById("invcalc_required_monthly").textContent = invcalc_formatBangladeshiNumber(initialMonthlyInvestment.toFixed(2));
-    }
-
-    const breakdownEl = document.getElementById("invcalc_breakdown_text");
-    let breakdownHTML = "";
-    if (mode === "projection") {
-      breakdownHTML +=
-        "<p>With an initial monthly investment of <strong>" +
-        invcalc_formatBangladeshiNumber(initialMonthlyInvestment.toFixed(0)) +
-        " BDT</strong>, increasing by <strong>" +
-        (yearlyIncreaseRate * 100).toFixed(1) +
-        "%</strong> annually" +
-        (reinvestProfits ? " and reinvesting profits" : "") +
-        ", your money will grow as follows:</p>";
-    } else {
-      breakdownHTML +=
-        "<p>To reach your goal of <strong>" +
-        invcalc_formatBangladeshiNumber(targetAmount.toFixed(0)) +
-        " BDT</strong> in " +
-        years +
-        " years, you would need an initial monthly investment of <strong>" +
-        invcalc_formatBangladeshiNumber(initialMonthlyInvestment.toFixed(0)) +
-        " BDT</strong>. The breakdown below shows this scenario:</p>";
-    }
-
-    const milestones = [];
-    const milestoneYears = [5, 10, 20];
-    let finalSummaryAdded = false;
-
-    milestoneYears.forEach((mYear) => {
-      if (years >= mYear) {
-        const milestoneData = yearlySummary.find((y) => y.year === mYear);
-        if (milestoneData) {
-          const growthM = milestoneData.totalInvested > 0 ? (milestoneData.totalValue / milestoneData.totalInvested) * 100 - 100 : 0;
-          milestones.push(
-            '<div class="invcalc_milestone">' +
-              "<p><strong>After " +
-              mYear +
-              " years:</strong> Your investment will grow to <strong>" +
-              invcalc_formatBangladeshiNumber(milestoneData.totalValue.toFixed(0)) +
-              " BDT</strong>, " +
-              "from a total invested amount of <strong>" +
-              invcalc_formatBangladeshiNumber(milestoneData.totalInvested.toFixed(0)) +
-              " BDT</strong>, " +
-              "with a profit of <strong>" +
-              invcalc_formatBangladeshiNumber(milestoneData.profit.toFixed(0)) +
-              " BDT</strong>" +
-              " (" +
-              (growthM > 0 ? growthM.toFixed(2) + "% growth rate" : "N/A growth") +
-              ").</p>" +
-              "</div>"
-          );
-          if (years === mYear) {
-            finalSummaryAdded = true;
-          }
-        }
-      }
-    });
-
-    if (!finalSummaryAdded) {
-      milestones.push(
-        '<div class="invcalc_milestone">' +
-          "<p><strong>After " +
-          years +
-          " years:</strong> Your total investment of <strong>" +
-          invcalc_formatBangladeshiNumber(totalInvested.toFixed(0)) +
-          " BDT</strong>" +
-          "will grow to <strong>" +
-          invcalc_formatBangladeshiNumber(finalAmount.toFixed(0)) +
-          " BDT</strong>, " +
-          "giving you a profit of <strong>" +
-          invcalc_formatBangladeshiNumber(totalProfit.toFixed(0)) +
-          " BDT</strong>" +
-          " (" +
-          (totalInvested > 0 ? growthRate.toFixed(2) + "% growth rate" : "N/A growth") +
-          ").</p>" +
-          "</div>"
-      );
-    }
-
-    breakdownHTML += milestones.join("");
-    breakdownEl.innerHTML = breakdownHTML;
-
-    const tableBody = document.getElementById("invcalc_summary_table");
-    tableBody.innerHTML = "";
-
-    yearlySummary.forEach((row, index) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML =
-        "<td>" +
-        (index + 1) +
-        ". " +
-        (new Date().getFullYear() + row.year - 1) +
-        "<br/>" +
-        (initialProfit + index * profitIncrease).toFixed(0) +
-        "%" +
-        "</td>" +
-        "<td>" +
-        invcalc_formatBangladeshiNumber(row.yearlyInvestment.toFixed(0)) +
-        "<br/>" +
-        invcalc_formatBangladeshiNumber(row.totalInvested.toFixed(0)) +
-        "</td>" +
-        "<td>" +
-        invcalc_formatBangladeshiNumber(row.totalValue.toFixed(0)) +
-        "</td>" +
-        "<td>" +
-        invcalc_formatBangladeshiNumber(row.yearlyProfit.toFixed(0)) +
-        "<br/>" +
-        invcalc_formatBangladeshiNumber(row.profit.toFixed(0)) +
-        "</td>" +
-        "<td>" +
-        (row.totalInvested > 0 ? row.growthRate.toFixed(2) + "%" : "N/A") +
-        "</td>";
-      tableBody.appendChild(tr);
-    });
-
-    resultsDiv.classList.remove("invcalc_hidden");
-  }
-</script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="assets/js/calculator.js"></script>
+  </body>
+</html>
