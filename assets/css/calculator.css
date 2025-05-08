@@ -50,3 +50,24 @@
 .invcalc_hidden {
   display: none !important;
 }
+
+/* Force dark table header if needed */
+.table thead.table-dark th {
+  background-color: #212529 !important;
+  color: #fff !important;
+}
+
+/* Mobile-friendly table font size */
+@media (max-width: 576px) {
+  .mobile-table th,
+  .mobile-table td {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .investment-calculator,
+  #invcalc_results .card-body .card-body {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}

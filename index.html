@@ -211,5 +211,29 @@
 
     <!-- JavaScript -->
     <script src="./assets/js/app.js"></script>
+
+    <footer class="footer mt-auto py-3 bg-light border-top">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+            <span class="text-muted" id="copyright-text"></span>
+            <span> | Created with <span style="color: #e25555">&#10084;&#65039;</span> by <a href="https://faisalahammad.com" target="_blank" rel="noopener" class="text-decoration-none">Faisal</a></span>
+          </div>
+          <div class="col-md-6 text-center text-md-end">
+            <nav>
+              <a href="index.html" class="text-muted me-3">Investment Profit Calculator</a>
+              <a href="calculator.html" class="text-muted">Investment Projection Tool</a>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <script>
+      // Set dynamic copyright year
+      document.addEventListener("DOMContentLoaded", function () {
+        var year = new Date().getFullYear();
+        document.getElementById("copyright-text").textContent = `© ${year} All Rights Reserved.`;
+      });
+    </script>
   </body>
 </html>

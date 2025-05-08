@@ -478,11 +478,9 @@ function invcalc_calculate() {
     tr.innerHTML =
       "<td>" +
       (index + 1) +
-      ". " +
+      "</td>" +
+      "<td>" +
       (new Date().getFullYear() + row.year - 1) +
-      "<br/>" +
-      (initialProfit + index * profitIncrease).toFixed(0) +
-      "%" +
       "</td>" +
       "<td>" +
       invcalc_formatBangladeshiNumber(row.yearlyInvestment.toFixed(0)) +
